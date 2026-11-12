@@ -1,0 +1,28 @@
+{
+  "name": "hornalla",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Hornalla: herramientas gratuitas para comedores y merenderos (calculadora con datos oficiales del INDEC, página para donantes y mapa de organizaciones). Sitio estático.",
+  "author": "Santino Spingola",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "node scripts/serve-web.mjs 4173",
+    "test": "vitest run",
+    "datos:canasta": "node scripts/build-canasta-data.mjs",
+    "datos:precios": "node scripts/build-precios-data.mjs",
+    "datos:organizaciones": "node scripts/build-organizaciones.mjs",
+    "datos:organizaciones:demo": "node scripts/build-organizaciones.mjs --demo",
+    "desplegar": "cd web && vercel deploy --prod --yes"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "indec-mcp": "^0.1.2",
+    "leaflet": "^1.9.4",
+    "qrcode-generator": "^2.0.4",
+    "typescript": "^5.9.3",
+    "vitest": "^5.1.0"
+  }
+}

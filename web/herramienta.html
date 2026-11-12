@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Herramienta gratuita para comedores y merenderos — Hornalla</title>
+  <meta name="description" content="Herramienta gratuita para comedores, merenderos y organizaciones: calculá cuánto cuesta dar de comer con la canasta básica alimentaria del INDEC, organizá presupuesto, despensa y raciones, y armá una página para quienes quieran donar. No pide datos personales.">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Herramienta gratuita para comedores y merenderos — Hornalla">
+  <meta property="og:description" content="Costos con datos oficiales del INDEC, organización del comedor y una página para quienes quieran donar.">
+  <meta property="og:locale" content="es_AR">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='0' fill='%23161513'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%23FBFAF8' stroke-width='2.4'/%3E%3Cpath d='M16 8.500c.7 3.100 4 4.600 4 8a4 4 0 0 1-8 0c0-1.800 1-2.900 1.800-4.100.6 1.100 1.100 1.700 1.800 1.700-.5-1.900-.5-3.700.4-5.600z' fill='%23E0653B'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body class="con-nav">
+  <a class="skip" href="#principal">Saltar al contenido</a>
+
+  <div class="shell">
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="side-brand">
+        <a class="logo" href="./" aria-label="Hornalla, inicio"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12.500" fill="none" stroke="currentColor" stroke-width="2.600"/><path class="llama" d="M16 6.800c.9 4 5.200 5.900 5.200 10.300a5.200 5.200 0 0 1-10.400 0c0-2.300 1.400-3.700 2.300-5.300.8 1.500 1.500 2.300 2.300 2.300-.7-2.500-.7-4.800.6-7.300z"/></svg><span>Hornalla</span></a>
+        <p>Herramienta gratuita para comedores, merenderos y organizaciones.</p>
+      </div>
+      <div class="side-group">
+        <span class="side-label" id="lblHerr">Herramientas</span>
+        <div class="side-list" role="tablist" aria-labelledby="lblHerr" aria-orientation="vertical">
+          <button class="nav-item" role="tab" id="tab-calcular" data-tab="calcular" aria-controls="p-calcular" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2.5" width="14" height="19"/><path d="M8.5 7h7M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01"/></svg><span>Calcular</span></button>
+          <button class="nav-item" role="tab" id="tab-presupuesto" data-tab="presupuesto" aria-controls="p-presupuesto" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h17v13H3zM3 7V4h14v3M15.5 13.5h2.5"/></svg><span>Presupuesto</span></button>
+          <button class="nav-item" role="tab" id="tab-despensa" data-tab="despensa" aria-controls="p-despensa" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5l9-5 9 5v9l-9 5-9-5zM3 7.5l9 5 9-5M12 12.5v9"/></svg><span>Despensa</span></button>
+          <button class="nav-item" role="tab" id="tab-raciones" data-tab="raciones" aria-controls="p-raciones" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v8a2 2 0 0 0 2 2v8M10 3v8M8 3v8M18 3c-2.2 1.2-3 4-3 8h3v10"/></svg><span>Raciones</span></button>
+          <button class="nav-item" role="tab" id="tab-compartir" data-tab="compartir" aria-controls="p-compartir" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="5.5" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.2 10.8l7.6-4M8.2 13.2l7.6 4"/></svg><span>Compartir</span></button>
+        </div>
+      </div>
+      <div class="side-group extra">
+        <span class="side-label" id="lblCom">Hornalla</span>
+        <div class="side-list" aria-labelledby="lblCom">
+          <a class="nav-item" href="./"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7.5 9 7.5M5.5 9.500V21h13V9.500M10 21v-6h4v6"/></svg><span>Volver al inicio</span><svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></a>
+          <a class="nav-item" href="instructivo.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.500h8l4 4v15H6zM14 2.500v4h4M9 12h6M9 16h6"/></svg><span>Instructivo para imprimir</span><svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></a>
+        </div>
+      </div>
+      <div class="side-foot"><strong>Datos oficiales del INDEC</strong>Canasta básica alimentaria, edición <span class="edicion"></span>. Proyecto independiente, no oficial.</div>
+    </aside>
+
+    <div class="content">
+      <header class="mbar">
+        <div class="mbar-in">
+          <a class="logo" href="./" aria-label="Hornalla, inicio"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12.500" fill="none" stroke="currentColor" stroke-width="2.600"/><path class="llama" d="M16 6.800c.9 4 5.200 5.900 5.200 10.300a5.200 5.200 0 0 1-10.400 0c0-2.300 1.400-3.700 2.300-5.300.8 1.500 1.500 2.300 2.300 2.300-.7-2.500-.7-4.800.6-7.300z"/></svg><span>Hornalla</span></a>
+          <a class="mlink" href="./">Inicio →</a>
+        </div>
+      </header>
+
+      <aside class="banner" id="bannerPiloto" hidden role="note">
+    <div><strong>Versión de prueba.</strong> La estamos probando con organizaciones y va a cambiar. <span id="bannerTexto">Si algo no te sirve o está mal, avisanos.</span> <a id="bannerLink" href="#" hidden rel="noopener">Contanos qué te sirvió y qué no →</a></div>
+  </aside>
+
+  <main id="principal" class="wrap">
+
+    <!-- ═════════ CALCULAR ═════════ -->
+    <section id="p-calcular" role="tabpanel" aria-labelledby="tab-calcular">
+      <div class="panel-head">
+        <p class="eyebrow">Calculadora</p>
+        <h1>Cuánto cuesta mantener la hornalla prendida</h1>
+        <p>Cargá cuántas personas comen, por edad. Calculamos cuánto cuesta alimentarlas con la canasta básica alimentaria oficial del INDEC (<span class="edicion"></span>). Tus datos se guardan solo en este navegador.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="stack">
+          <div class="card">
+            <h2>1. ¿A cuántas personas dan de comer?</h2>
+            <p class="sub">Cargá cuántas hay de cada edad. Si no sabés la edad exacta, poné la más cercana. No hace falta anotar nombres.</p>
+            <div class="row-end" style="margin-top:16px">
+              <div class="field" style="flex:1; min-width:220px">
+                <label for="selEjemplo">Probar con un ejemplo oficial del INDEC</label>
+                <select id="selEjemplo" class="select"><option value="">Elegir un ejemplo…</option></select>
+              </div>
+              <button type="button" class="btn" id="btnBorrarGrupo">Borrar todo</button>
+            </div>
+            <div id="grupos" style="margin-top:16px"></div>
+            <p class="total-line" id="totales" aria-live="polite"></p>
+            <details class="help">
+              <summary>¿Qué es un «adulto equivalente»?</summary>
+              <p>Es la forma que usa el INDEC para contar cuánto necesita comer cada persona según su edad y sexo. Un varón adulto de 30 a 60 años vale <strong>1</strong>; un bebé de menos de 1 año, <strong>0,35</strong>; una mujer adulta, alrededor de <strong>0,77</strong>. Se suman todos y ese total se multiplica por el valor de la canasta.</p>
+            </details>
+          </div>
+
+          <div class="card">
+            <h2>2. ¿Cuánto cubren?</h2>
+            <div class="form-grid cols-2" style="margin-top:16px">
+              <div class="field">
+                <label for="dias">Días por mes que dan de comer</label>
+                <input id="dias" class="input" type="text" inputmode="numeric" value="30" autocomplete="off">
+                <span class="hint">De 1 a 31.</span>
+              </div>
+              <div class="field">
+                <label for="porcion">Porción de la canasta diaria que cubre su servicio (%)</label>
+                <input id="porcion" class="input" type="text" inputmode="numeric" value="100" autocomplete="off">
+                <span class="hint">El INDEC calcula la canasta para <strong>todo un día</strong> de comida. Si sirven, por ejemplo, una sola comida, poné el porcentaje que le corresponda: <strong>no hay un valor oficial</strong>, es tu estimación.</span>
+              </div>
+              <div class="full chips" role="group" aria-label="Valores rápidos de porción">
+                <button type="button" class="chip" data-p="25">25 %</button>
+                <button type="button" class="chip" data-p="33">33 %</button>
+                <button type="button" class="chip" data-p="50">50 %</button>
+                <button type="button" class="chip" data-p="100">100 %</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="sticky stack" aria-label="Resultado">
+          <div class="card" id="resultado">
+            <p class="small muted" id="resEtq">Dar de comer a tu grupo cuesta</p>
+            <p class="hero-num" id="resNum" style="margin-top:8px">—</p>
+            <p class="muted" id="resSub" style="margin-top:4px">por mes</p>
+            <dl class="dl" id="resDatos" style="margin-top:20px"></dl>
+            <div class="btn-group" style="margin-top:20px">
+              <button type="button" class="btn btn-primary btn-block" id="btnIrPresupuesto">Seguir con el presupuesto →</button>
+              <button type="button" class="btn btn-block" id="btnIrCompartir">Armar página para donantes</button>
+            </div>
+          </div>
+          <p class="hint">Es el costo de una canasta <strong>de referencia</strong> a precios promedio del Gran Buenos Aires. Comprar al por mayor o recibir donaciones en especie lo cambia.</p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ═════════ PRESUPUESTO ═════════ -->
+    <section id="p-presupuesto" role="tabpanel" aria-labelledby="tab-presupuesto" hidden>
+      <div class="panel-head">
+        <p class="eyebrow">Presupuesto</p>
+        <h1>Presupuesto del mes</h1>
+        <p>Anotá lo que entra y lo que sale. Lo comparamos con lo que cuesta alimentar a tu grupo para que veas hasta cuándo alcanza.</p>
+      </div>
+
+      <div class="row-end" style="margin-bottom:20px">
+        <div class="field"><label for="mesPres">Mes</label><input id="mesPres" class="input" type="month" style="max-width:200px"></div>
+        <button type="button" class="btn" id="btnCsvPres">Descargar planilla (CSV)</button>
+      </div>
+
+      <div id="presVacio" class="callout warn" hidden style="margin-bottom:20px">Todavía no cargaste personas, así que no hay un costo estimado para comparar. <a href="#calcular" data-ir="calcular">Cargalas en Calcular</a>.</div>
+
+      <div class="stats cols-4" id="presStats"></div>
+      <div class="card" style="margin-top:20px" id="presCard">
+        <div class="row" style="justify-content:space-between"><span class="small muted">Lo reunido cubre</span><b class="num" id="presPct">—</b></div>
+        <div class="bar lg" style="margin-top:10px"><i id="presBarra" style="width:0"></i></div>
+        <p class="small" style="margin-top:12px" id="presTexto"></p>
+      </div>
+
+      <div class="grid-2" style="margin-top:20px">
+        <div class="card">
+          <h2>Registrar un ingreso</h2>
+          <p class="sub">Donaciones, subsidios, aportes propios. No anotes nombres de personas: alcanza con el origen («vecinos», «cena solidaria»).</p>
+          <div class="form-grid cols-2" style="margin-top:16px">
+            <div class="field"><label for="ingFecha">Fecha</label><input id="ingFecha" class="input" type="date"></div>
+            <div class="field"><label for="ingMonto">Monto</label><div class="money"><span>$</span><input id="ingMonto" class="input" type="text" inputmode="numeric" autocomplete="off" placeholder="50.000"></div></div>
+            <div class="field full"><label for="ingOrigen">Origen</label><input id="ingOrigen" class="input" type="text" maxlength="60" autocomplete="off" placeholder="Ej.: Donaciones de vecinos"></div>
+          </div>
+          <button type="button" class="btn btn-primary" id="btnIng" style="margin-top:16px">Agregar ingreso</button>
+        </div>
+        <div class="card">
+          <h2>Registrar un gasto</h2>
+          <p class="sub">Solo lo que se compra. La comida donada en especie no entra acá.</p>
+          <div class="form-grid cols-2" style="margin-top:16px">
+            <div class="field"><label for="gasFecha">Fecha</label><input id="gasFecha" class="input" type="date"></div>
+            <div class="field"><label for="gasMonto">Monto</label><div class="money"><span>$</span><input id="gasMonto" class="input" type="text" inputmode="numeric" autocomplete="off" placeholder="30.000"></div></div>
+            <div class="field"><label for="gasRubro">Rubro</label><select id="gasRubro" class="select"></select></div>
+            <div class="field"><label for="gasDetalle">Detalle <span class="muted">(opcional)</span></label><input id="gasDetalle" class="input" type="text" maxlength="80" autocomplete="off" placeholder="Ej.: Garrafa"></div>
+          </div>
+          <button type="button" class="btn btn-primary" id="btnGas" style="margin-top:16px">Agregar gasto</button>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:20px">
+        <div><h2 class="label" style="margin-bottom:8px">Ingresos del mes</h2><div class="table-wrap"><table class="table" id="tablaIng"><tbody></tbody></table></div></div>
+        <div><h2 class="label" style="margin-bottom:8px">Gastos del mes</h2><div class="table-wrap"><table class="table" id="tablaGas"><tbody></tbody></table></div></div>
+      </div>
+    </section>
+
+    <!-- ═════════ DESPENSA ═════════ -->
+    <section id="p-despensa" role="tabpanel" aria-labelledby="tab-despensa" hidden>
+      <div class="panel-head">
+        <p class="eyebrow">Despensa</p>
+        <h1>Despensa</h1>
+        <p>Anotá lo que tenés y te decimos qué falta para el mes, con las cantidades de la canasta oficial del INDEC para tu grupo. De ahí sale la lista para pedir.</p>
+      </div>
+
+      <div id="despVacio" class="callout warn" hidden style="margin-bottom:20px">Todavía no cargaste personas, así que no hay cantidades necesarias. <a href="#calcular" data-ir="calcular">Cargalas en Calcular</a>.</div>
+
+      <div class="row" style="justify-content:space-between; margin-bottom:16px">
+        <p class="small muted" id="despResumen" aria-live="polite"></p>
+        <div class="row">
+          <button type="button" class="btn btn-primary" id="btnPedido">Armar pedido</button>
+          <button type="button" class="btn" id="btnImprimirDesp">Imprimir lista</button>
+          <button type="button" class="btn btn-quiet" id="btnVaciarStock">Vaciar lo que tengo</button>
+        </div>
+      </div>
+
+      <div class="card" id="pedidoCard" hidden style="margin-bottom:20px">
+        <h2>Pedido listo para enviar</h2>
+        <p class="sub">Lo más urgente primero. Podés editarlo antes de mandarlo.</p>
+        <textarea id="pedidoTxt" class="pedido" style="margin-top:16px" aria-label="Texto del pedido"></textarea>
+        <div class="row" style="margin-top:12px">
+          <button type="button" class="btn btn-primary" id="btnCopiarPedido">Copiar</button>
+          <button type="button" class="btn" id="btnWspPedido">Enviar por WhatsApp</button>
+        </div>
+      </div>
+
+      <div class="table-wrap" style="max-height:none">
+        <table class="table" id="tablaDesp">
+          <thead><tr><th scope="col">Alimento</th><th scope="col" class="r">Necesario</th><th scope="col" class="r">Tenemos</th><th scope="col" class="r">Falta</th><th scope="col">Cubierto</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="callout" style="margin-top:20px"><strong>Es una referencia estadística</strong> construida por el INDEC a partir de lo que come la población (ENGHo 2004/05). <strong>No es un menú ni una indicación nutricional</strong>: para eso consultá a un/a nutricionista.</p>
+    </section>
+
+    <!-- ═════════ RACIONES ═════════ -->
+    <section id="p-raciones" role="tabpanel" aria-labelledby="tab-raciones" hidden>
+      <div class="panel-head">
+        <p class="eyebrow">Raciones</p>
+        <h1>Raciones servidas</h1>
+        <p>Anotá cada día cuántas raciones sirvieron. Solo cantidades, nunca nombres. Sirve para ver cuánto cuesta cada ración y para mostrarle a quienes donan qué se logra.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="stack">
+          <div class="card">
+            <h2>Registrar un día</h2>
+            <div class="form-grid cols-2" style="margin-top:16px">
+              <div class="field"><label for="racFecha">Fecha</label><input id="racFecha" class="input" type="date"></div>
+              <div class="field"><label for="racCant">Raciones servidas</label><input id="racCant" class="input" type="text" inputmode="numeric" autocomplete="off" placeholder="60"></div>
+            </div>
+            <div class="row" style="margin-top:16px">
+              <button type="button" class="btn btn-primary" id="btnRacGuardar">Guardar</button>
+              <button type="button" class="btn btn-quiet" id="btnRacQuitar">Quitar este día</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="row" style="justify-content:space-between"><h2 style="margin:0">Días del mes</h2><div class="field"><label class="visually-hidden" for="mesRac">Mes</label><input id="mesRac" class="input" type="month" style="min-height:38px"></div></div>
+            <div class="days" id="racLista" style="margin-top:12px"></div>
+          </div>
+        </div>
+        <aside class="sticky stack" aria-label="Resumen del mes">
+          <div class="stats" id="racStats"></div>
+          <div class="card">
+            <div class="row" style="justify-content:space-between"><span class="small muted">Servido vs. lo planificado</span><b class="num" id="racPct">—</b></div>
+            <div class="bar lg ok" style="margin-top:10px"><i id="racBarra" style="width:0"></i></div>
+            <p class="hint" style="margin-top:10px" id="racPlan"></p>
+          </div>
+          <p class="hint" id="racCosto"></p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ═════════ COMPARTIR ═════════ -->
+    <section id="p-compartir" role="tabpanel" aria-labelledby="tab-compartir" hidden>
+      <div class="panel-head">
+        <p class="eyebrow">Compartir</p>
+        <h1>Compartir y pedir ayuda</h1>
+        <p>Armá una página donde quien quiera ayudar vea, con números, qué logra su aporte. Se comparte con un enlace y un QR para imprimir.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="stack">
+          <div class="card">
+            <h2>Datos de tu organización</h2>
+            <div class="form-grid" style="margin-top:16px">
+              <div class="field"><label for="orgNombre">Nombre</label><input id="orgNombre" class="input" type="text" maxlength="60" autocomplete="off" placeholder="Ej.: Merendero La Esperanza"></div>
+              <div class="field"><label for="orgAlias">Alias o CBU/CVU para recibir donaciones</label><input id="orgAlias" class="input" type="text" maxlength="40" autocomplete="off" spellcheck="false" placeholder="Ej.: esperanza.merendero"><span class="hint">Solo letras, números, puntos y guiones (de 6 a 40). Ojo: se publica en tu página.</span></div>
+              <div class="field"><label for="orgTitular">Titular de la cuenta</label><input id="orgTitular" class="input" type="text" maxlength="60" autocomplete="off" placeholder="Ej.: Asociación Civil La Esperanza"><span class="hint">Quien dona lo ve en su banco antes de confirmar: así puede comprobar que coincide.</span></div>
+              <div class="field"><label for="orgMensaje">Mensaje corto <span class="muted">(opcional)</span></label><input id="orgMensaje" class="input" type="text" maxlength="140" autocomplete="off" placeholder="Ej.: Meriendas para 60 chicos de lunes a viernes"></div>
+            </div>
+            <div class="stack" style="margin-top:16px; gap:8px">
+              <label class="check"><input type="checkbox" id="optRecibido"><span>Mostrar lo reunido este mes y lo que falta <span class="muted">(sale de tu Presupuesto)</span></span></label>
+              <label class="check"><input type="checkbox" id="optServidas"><span>Mostrar las raciones servidas este mes <span class="muted">(sale de Raciones)</span></span></label>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Página para donantes</h2>
+            <p class="sub">Quien la abre ve qué se logra con su aporte, cómo donar y puede armar una tarjeta de agradecimiento.</p>
+            <div class="qr-box" style="margin-top:16px">
+              <div class="qr" id="qrBox" aria-label="Código QR de la página para donantes" role="img"></div>
+              <div class="stack" style="gap:12px; flex:1; min-width:220px">
+                <div class="link-row"><input id="linkDonar" class="input" type="text" readonly aria-label="Enlace de la página para donantes"><button type="button" class="btn" id="btnCopiarLink">Copiar</button></div>
+                <div class="row"><a class="btn btn-primary" id="btnAbrirDonar" href="donar.html" target="_blank" rel="noopener">Ver cómo la ve quien dona</a><button type="button" class="btn" id="btnQrSvg">Descargar QR</button></div>
+              </div>
+            </div>
+            <div id="avisoAlias" class="callout warn" hidden style="margin-top:16px">Todavía no cargaste el alias: la página muestra el impacto pero <strong>no dice cómo donar</strong>.</div>
+            <p class="callout" style="margin-top:16px"><strong>Cómo funciona:</strong> los datos van dentro del enlace, no en un servidor. Si cambia algo (alias, lo reunido, las raciones), <strong>volvé a compartir el enlace nuevo</strong>. Hornalla no recibe ni verifica donaciones: las transferencias van directo a tu cuenta.</p>
+          </div>
+        </div>
+
+        <aside class="stack">
+          <div class="card">
+            <h2>Material para compartir</h2>
+            <div class="btn-group" style="margin-top:16px">
+              <button type="button" class="btn btn-primary btn-block" id="btnAfiche">Imprimir afiche con QR</button>
+              <button type="button" class="btn btn-block" id="btnTarjetaOrg">Descargar tarjeta para pedir ayuda</button>
+              <button type="button" class="btn btn-block" id="btnMsgAyuda">Copiar mensaje para WhatsApp</button>
+              <button type="button" class="btn btn-block" id="btnWspAyuda">Enviar por WhatsApp</button>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Sumá tu organización al mapa</h2>
+            <p class="sub">El mapa de Hornalla muestra comedores y merenderos y cómo ayudarlos. Aparecés solo si lo pedís y elegís qué datos mostrar (dirección y contacto son opcionales).</p>
+            <a class="btn btn-block" href="mapa.html" style="margin-top:16px">Ver el mapa y pedir el alta</a>
+          </div>
+          <div class="card">
+            <h2>Copia de seguridad</h2>
+            <p class="sub">Tus datos están solo en este navegador. Descargá una copia seguido, sobre todo si cambiás de celular o limpiás el navegador.</p>
+            <div class="btn-group" style="margin-top:16px">
+              <button type="button" class="btn btn-block" id="btnExportar">Descargar copia (JSON)</button>
+              <label class="btn btn-block" for="fileImportar" style="cursor:pointer">Restaurar desde una copia</label>
+              <input id="fileImportar" type="file" accept="application/json,.json" class="visually-hidden">
+              <button type="button" class="btn btn-block btn-danger btn-quiet" id="btnBorrarTodo">Borrar todos mis datos</button>
+            </div>
+            <p class="callout warn" id="persistAviso" hidden style="margin-top:16px">Tu navegador no permite guardar datos acá (modo privado o bloqueado): <strong>lo que cargues se pierde al cerrar</strong>. Descargá la copia antes de salir.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <div id="afiche" class="print-only" hidden aria-hidden="true">
+    <div class="a-org" id="aOrg"></div>
+    <p class="a-sub">Ayudanos a seguir dando de comer</p>
+    <div class="a-qr" id="aQr"></div>
+    <p class="a-how">Escaneá el código para ver qué logra tu aporte</p>
+    <p class="a-alias" id="aAlias"></p>
+    <p class="a-how" id="aTitular"></p>
+    <p class="a-foot">Cálculos con la canasta básica alimentaria del INDEC. Proyecto independiente y gratuito, no oficial.</p>
+  </div>
+  <div id="imprimirDespensa" class="print-only" hidden aria-hidden="true"></div>
+
+  <footer class="footer">
+    <p>Hornalla · Edición <span class="edicion"></span> · Datos del INDEC generados el <span id="generado"></span></p>
+    <p>Proyecto independiente y gratuito: no es oficial ni está afiliado al INDEC ni a ningún organismo. Sin cookies, sin analíticas y sin publicidad. Las tipografías se cargan desde Google Fonts.</p>
+    <p><a href="instructivo.html">Instructivo para imprimir</a></p>
+    <p id="contactoLinea" hidden>Contacto: <a id="contactoLink" href="#"></a></p>
+  </footer>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script src="canasta-data.js"></script>
+  <script src="precios-data.js"></script>
+  <script src="referencia.js"></script>
+  <script src="formato.js"></script>
+  <script src="canasta-lib.js"></script>
+  <script src="store.js"></script>
+  <script src="org-lib.js"></script>
+  <script src="donante-lib.js"></script>
+  <script src="vendor/qrcode.js"></script>
+  <script src="tarjetas.js"></script>
+  <script src="app.js"></script>
+  <script src="micro.js"></script>
+</body>
+</html>

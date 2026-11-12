@@ -1,0 +1,5 @@
+{
+  "type": "commonjs",
+  "private": true,
+  "description": "Hornalla — sitio estático. Scripts de navegador (CommonJS solo para poder testearlos en Node)."
+}

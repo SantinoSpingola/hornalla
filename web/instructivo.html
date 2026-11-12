@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Instructivo — Hornalla en 5 pasos</title>
+  <meta name="robots" content="noindex">
+  <meta name="color-scheme" content="light dark">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="estilo.css">
+  <style>
+    .sheet .sub { margin-top: var(--s3); color: var(--muted); font-size: 1.0625rem; }
+    .example { margin-top: var(--s6); }
+    .example .hero-num { margin-top: var(--s2); }
+    @media print { .sheet { padding: 0; } body { font-size: 11pt; } .hero-num { color: #000; } }
+  </style>
+</head>
+<body>
+  <main class="sheet">
+    <p class="no-print" style="margin-bottom:24px"><a href="herramienta.html">← Volver a la herramienta</a> · <button type="button" class="btn btn-sm" onclick="window.print()">Imprimir</button></p>
+    <p class="small muted">Hornalla · herramienta gratuita</p>
+    <h1 style="margin-top:8px">Cuánto cuesta dar de comer, en 5 pasos</h1>
+    <p class="sub">Para comedores, merenderos, ollas populares y organizaciones. Usa los valores oficiales del INDEC. No pide datos personales y lo que cargás queda solo en tu navegador.</p>
+
+    <ol class="steps">
+      <li><div><b>Entrá a la herramienta</b>Desde el celular o la computadora: <strong id="url">(la dirección donde esté publicada)</strong></div></li>
+      <li><div><b>Cargá cuántas personas comen, por edad (sección «Calcular»)</b>Con los botones <strong>+</strong> y <strong>−</strong>, o escribiendo el número. Si no sabés una edad exacta, poné la más cercana. No hace falta anotar nombres: solo cuántas hay de cada edad.</div></li>
+      <li><div><b>Elegí cuántos días dan de comer y cuánto cubren</b>«Días por mes» es cuántos días del mes funciona el comedor. «Porción de la canasta diaria» es qué parte de toda la comida de un día cubre su servicio. <strong>No hay un valor oficial: es tu estimación.</strong></div></li>
+      <li><div><b>Organizá el mes</b>En <strong>Presupuesto</strong> anotás lo que entra y lo que sale. En <strong>Despensa</strong> anotás lo que tenés y te dice qué falta, con un pedido listo para mandar. En <strong>Raciones</strong> anotás cuántas se sirvieron cada día.</div></li>
+      <li><div><b>Pedí ayuda con números (sección «Compartir»)</b>Armás una página donde quien quiera ayudar ve qué logra su aporte y cómo donar, con un enlace y un QR para imprimir en un afiche.</div></li>
+    </ol>
+
+    <div class="card example" id="ejemplo" hidden>
+      <p class="small"><strong>Un ejemplo oficial del INDEC:</strong> un hogar de 5 personas (un varón y una mujer de 30 años y tres hijos de 1, 3 y 5 años).</p>
+      <p class="small muted" style="margin-top:8px">Suman <strong id="exAe"></strong> adultos equivalentes y alimentarlos todo el mes cuesta</p>
+      <p class="hero-num" id="exCosto"></p>
+      <p class="xs muted" style="margin-top:8px" id="exFuente"></p>
+    </div>
+
+    <div class="callout warn" style="margin-top:24px">
+      <strong>Tené en cuenta</strong>
+      <ul style="margin:8px 0 0; padding-left:20px; display:grid; gap:4px">
+        <li>El valor corresponde al <strong>Gran Buenos Aires</strong>. En otras zonas los precios son distintos.</li>
+        <li>Es el costo de una canasta <strong>de referencia</strong> a precios promedio. Comprar al por mayor o recibir donaciones en especie lo cambia.</li>
+        <li><strong>No es un menú ni una guía nutricional.</strong> Para eso, consultá a un/a nutricionista.</li>
+        <li>Tus datos están <strong>solo en tu navegador</strong>: descargá una copia de seguridad seguido (sección «Compartir»).</li>
+        <li>Hornalla <strong>no recibe ni verifica donaciones</strong>: las transferencias van directo a la cuenta de tu organización.</li>
+      </ul>
+    </div>
+
+    <p class="xs muted" style="margin-top:24px; padding-top:16px; border-top:1px solid var(--line)">Proyecto independiente y gratuito: no es oficial ni está afiliado al INDEC ni a ningún organismo. Datos: INDEC (canasta básica alimentaria, Gran Buenos Aires, <span id="mes"></span>). Tabla de adultos equivalentes: INDEC, Metodología N° 22. Si algo no te sirve o está mal, avisá y se corrige.</p>
+  </main>
+
+  <script src="canasta-data.js"></script>
+  <script src="referencia.js"></script>
+  <script src="formato.js"></script>
+  <script src="canasta-lib.js"></script>
+  <script>
+    (function () {
+      var D = window.CANASTA_DATA, C = window.Canasta, F = window.Formato;
+      var last = D.periodos.length - 1;
+      document.getElementById("mes").textContent = F.periodoLabel(D.ultimoPeriodo, true);
+      if (location.protocol.indexOf("http") === 0) document.getElementById("url").textContent = location.origin + location.pathname.replace(/instructivo\.html$/, "");
+      var h = C.hogaresEjemplo[2], sel = {};
+      Object.keys(h.miembros).forEach(function (id) { ["m", "v"].forEach(function (s) { var n = h.miembros[id][s]; if (n) { var k = id + (C.esUnisex(id) ? "m" : s); sel[k] = (sel[k] || 0) + n; } }); });
+      var t = C.totales(sel);
+      document.getElementById("exAe").textContent = F.num(t.ae, 2);
+      document.getElementById("exCosto").textContent = F.pesos(C.costoMensual(D.cba[last], t.ae, 30, 100)) + " por mes";
+      document.getElementById("exFuente").textContent = "Valor de la canasta oficial del INDEC, " + F.periodoLabel(D.ultimoPeriodo, true) + ".";
+      document.getElementById("ejemplo").hidden = false;
+    })();
+  </script>
+</body>
+</html>

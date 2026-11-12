@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Asadómetro — ¿Cuántos kilos de asado compra tu ingreso?</title>
+  <meta name="description" content="Cuántos kilos de asado (y de otros 58 productos) compran el salario mínimo, la jubilación mínima y la AUH, mes a mes desde 2016. Solo datos oficiales del INDEC, ANSES y MTEySS. Metodología abierta.">
+  <meta name="theme-color" content="#17120F">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Asadómetro — ¿Cuántos kilos de asado compra tu ingreso?">
+  <meta property="og:description" content="Salario mínimo, jubilación mínima y AUH medidos en kilos de asado, con datos oficiales y metodología abierta.">
+  <meta property="og:locale" content="es_AR">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2317120F'/%3E%3Cpath d='M16 4c1 5 7 8 7 15a7 7 0 0 1-14 0c0-3 2-5 3-7 1 2 2 3 3 3-1-4-1-7 1-11z' fill='%23D2381C'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#principal">Saltar al contenido</a>
+
+  <header class="masthead">
+    <div class="mast-top">
+      <span>Edición <strong id="edicion">—</strong></span>
+      <span class="mast-src">Datos oficiales · INDEC · ANSES · MTEySS</span>
+    </div>
+    <div class="wordmark" aria-label="Asadómetro">
+      <svg class="flame" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2c1.2 6 8 9.500 8 17.500a8 8 0 0 1-16 0c0-3.500 2.200-5.800 3.500-8.200 1.200 2.200 2.300 3.400 3.500 3.400C14.200 10 14 6 16 2z"/></svg>
+      <span>Asadómetro</span>
+    </div>
+  </header>
+
+  <main id="principal">
+    <!-- ───────── Titular ───────── -->
+    <section class="hero" aria-labelledby="titular">
+      <div class="hero-main">
+        <p class="kicker">¿Cuántos kilos de asado compra…?</p>
+
+        <div class="chips" role="group" aria-label="Elegí un ingreso de referencia" id="chips">
+          <button type="button" class="chip" data-ing="smvm" aria-pressed="true">Salario mínimo</button>
+          <button type="button" class="chip" data-ing="haber_minimo" aria-pressed="false">Jubilación mínima</button>
+          <button type="button" class="chip" data-ing="auh" aria-pressed="false">AUH <small>por hijo</small></button>
+          <button type="button" class="chip" data-ing="custom" aria-pressed="false">Mi ingreso</button>
+        </div>
+
+        <div class="custom" id="customBox" hidden>
+          <label for="monto">Tu ingreso mensual, en pesos</label>
+          <div class="monto-wrap"><span aria-hidden="true">$</span><input id="monto" type="text" inputmode="numeric" autocomplete="off" placeholder="600.000" aria-describedby="montoAyuda"></div>
+          <p id="montoAyuda" class="ayuda">No guardamos nada: el cálculo se hace en tu dispositivo. Ojo: si copiás el enlace, el monto va incluido en él.</p>
+        </div>
+
+        <h1 id="titular" class="titular" aria-live="polite">
+          <span id="sujeto" class="sujeto">Con el salario mínimo, hoy alcanza para</span>
+          <span class="numero-fila"><span id="numero" class="numero">—</span><span id="unidad" class="unidad">kg de asado</span></span>
+        </h1>
+        <p class="detalle" id="detalle"></p>
+
+        <div class="acciones">
+          <button type="button" class="btn btn-primario" id="btnShare">Descargar imagen para compartir</button>
+          <button type="button" class="btn" id="btnCopy">Copiar enlace</button>
+        </div>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+      </div>
+
+      <aside class="refs" aria-labelledby="refsTitulo">
+        <h2 id="refsTitulo" class="refs-titulo">Para ponerlo en perspectiva</h2>
+        <ul id="refs" class="refs-lista"></ul>
+      </aside>
+    </section>
+
+    <div class="parrilla" aria-hidden="true"></div>
+
+    <!-- ───────── Gráfico ───────── -->
+    <section class="bloque" aria-labelledby="graficoTitulo">
+      <div class="bloque-cab">
+        <h2 id="graficoTitulo">Mes a mes, desde abril de 2016</h2>
+        <p class="bajada" id="graficoBajada"></p>
+      </div>
+
+      <div class="controles">
+        <div class="campo">
+          <label for="selProd">Producto</label>
+          <select id="selProd"></select>
+        </div>
+        <div class="campo">
+          <label for="selReg">Región</label>
+          <select id="selReg"></select>
+        </div>
+        <label class="check"><input type="checkbox" id="chkTodos"> <span>Ver los tres ingresos juntos</span></label>
+        <label class="check"><input type="checkbox" id="chkGob"> <span>Marcar períodos presidenciales</span></label>
+      </div>
+
+      <div class="grafico-card">
+        <div class="grafico" id="chart"></div>
+        <div class="tooltip" id="tooltip" role="presentation" hidden></div>
+        <div class="leyenda" id="leyenda"></div>
+        <div class="cursor-wrap">
+          <label for="cursor">Recorré los meses</label>
+          <input type="range" id="cursor" min="0" max="0" step="1" value="0">
+        </div>
+      </div>
+
+      <details class="tabla-det">
+        <summary>Ver los datos en tabla y descargarlos</summary>
+        <div class="tabla-acciones"><button type="button" class="btn" id="btnCsv">Descargar CSV</button></div>
+        <div class="tabla-scroll"><table class="tabla" id="tabla"><caption class="visually-hidden">Datos mensuales de la serie elegida</caption><thead></thead><tbody></tbody></table></div>
+      </details>
+    </section>
+
+    <!-- ───────── Ranking ───────── -->
+    <section class="bloque" aria-labelledby="rankTitulo">
+      <div class="bloque-cab">
+        <h2 id="rankTitulo">¿Y con otros productos?</h2>
+        <p class="bajada" id="rankBajada"></p>
+      </div>
+      <div class="controles">
+        <div class="campo">
+          <label for="selOrden">Ordenar por</label>
+          <select id="selOrden">
+            <option value="peor">Los que más poder de compra perdieron</option>
+            <option value="mejor">Los que menos perdieron o ganaron</option>
+            <option value="alfa">Orden alfabético</option>
+          </select>
+        </div>
+      </div>
+      <div class="tabla-scroll">
+        <table class="tabla rank" id="rank">
+          <thead><tr><th scope="col">Producto</th><th scope="col" class="r" id="thHoy">Hoy</th><th scope="col" class="r" id="thAntes">Sep 2017</th><th scope="col" class="r">Cambio</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <button type="button" class="btn btn-mas" id="btnMas">Ver los 59 productos</button>
+    </section>
+
+    <!-- ───────── Metodología ───────── -->
+    <section class="bloque metodo" id="metodologia" aria-labelledby="metTitulo">
+      <h2 id="metTitulo">Cómo se calcula (y qué no dice)</h2>
+      <div class="metodo-grid">
+        <div>
+          <h3>La cuenta</h3>
+          <p><strong>Unidades = ingreso mensual ÷ precio promedio del producto en ese mismo mes.</strong> Nada más: sin deflactores, sin proyecciones y sin estimaciones propias. Cualquiera puede repetirla con una calculadora.</p>
+          <h3>Fuentes</h3>
+          <ul>
+            <li><strong>Precios:</strong> INDEC, Índice de Precios al Consumidor, serie «precio promedio» (59 productos, desde abril de 2016). El asado se releva en el Gran Buenos Aires. Se obtienen de la <a href="https://api.indec.gob.ar" rel="noopener">API oficial del INDEC</a>.</li>
+            <li><strong>Salario mínimo, vital y móvil:</strong> Ministerio de Capital Humano (MTEySS), vía la <a href="https://datos.gob.ar" rel="noopener">API de Series de Tiempo de datos.gob.ar</a>.</li>
+            <li><strong>Jubilación mínima y AUH:</strong> ANSES, vía la misma API.</li>
+          </ul>
+          <h3>Cómo citarlo</h3>
+          <p class="cita" id="cita"></p>
+        </div>
+        <div>
+          <h3>Límites que conviene tener presentes</h3>
+          <ul>
+            <li>El asado es <strong>un solo producto</strong>. Es una vara fácil de entender, no una medida del costo de vida ni de la pobreza. Por eso se pueden mirar los otros 58.</li>
+            <li>La jubilación mínima <strong>no incluye el bono previsional</strong>: quien lo cobra tiene un poder de compra mayor al que muestra el sitio.</li>
+            <li>El salario mínimo es <strong>bruto y referencial</strong>: no es el sueldo típico ni descuenta aportes. La AUH es <strong>por hijo</strong> y no suma otras prestaciones.</li>
+            <li>Las comparaciones usan <strong>el mismo mes de cada año</strong> para no mezclar temporadas (frutas y verduras cambian mucho de precio según la época).</li>
+            <li>Son <strong>precios promedio</strong> relevados por el INDEC, no los de un comercio en particular. Los datos recientes pueden ser provisorios y revisarse.</li>
+            <li>Este sitio <strong>no explica causas</strong> ni evalúa políticas: muestra qué pasó con lo que se puede comprar. Los períodos presidenciales son solo una referencia de fechas.</li>
+            <li>El RIPTE (salario promedio registrado) no está incluido en esta edición porque su serie no estaba disponible en la API oficial al momento de generarla.</li>
+          </ul>
+          <h3>Quién lo hace</h3>
+          <p>Proyecto independiente. <strong>No es un sitio oficial ni está afiliado al INDEC</strong>, a ANSES ni al Gobierno. Los datos son de sus fuentes; los errores, de acá. Si encontrás uno, escribinos y lo corregimos en público.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <p>Asadómetro · Edición <span id="edicionPie"></span> · Datos generados el <span id="generado"></span></p>
+    <p>Hecho con la API oficial del INDEC. Sin cookies, sin analíticas y sin publicidad. Las tipografías se cargan desde Google Fonts.</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="lib.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
