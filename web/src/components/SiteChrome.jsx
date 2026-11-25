@@ -27,7 +27,7 @@ export function SiteHeader({ actual }) {
           <a href="./#preguntas">Preguntas</a>
         </nav>
         <div className="header-cta">
-          <a className="btn btn-lima" href="herramienta.html">Usar la herramienta →</a>
+          <a className="btn btn-acento" href="herramienta.html">Usar la herramienta →</a>
         </div>
         <button ref={btn} type="button" className="menu-btn" aria-expanded={abierto} aria-controls="menu" onClick={() => setAbierto((a) => !a)}>
           <i></i><i></i><i></i><span className="visually-hidden">Menú</span>

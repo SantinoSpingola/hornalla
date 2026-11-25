@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { DATA as D, Formato as F } from "../lib/globals.js";
 import { HREF_ALTA, MENSAJE_ALTA, ATRIBUTOS_NUEVA } from "../lib/contacto.js";
 import { SiteHeader, SiteFooter } from "../components/SiteChrome.jsx";
@@ -16,6 +17,40 @@ const MESES = D.periodos.length;
 const HACE = D.cba[LAST - 12] || null;
 const ORGS = (window.ORGANIZACIONES_DATA || {}).organizaciones || [];
 const ORGS_VERIFICADAS = ORGS.filter((o) => o.verificada).length;
+
+/** La marca gigante entra letra por letra desde abajo de su máscara. */
+function Marca() {
+  const letras = "Hornalla".split("");
+  return (
+    <h1 className="wordmark" aria-label="Hornalla.">
+      {letras.map((ch, i) => <span key={i} className="wm-char" aria-hidden="true" style={{ "--i": i }}>{ch}</span>)}
+      <em aria-hidden="true"><span className="wm-char" style={{ "--i": letras.length }}>.</span></em>
+    </h1>
+  );
+}
+
+/** La portada se achica apenas al scrollear (efecto «telón» de la referencia). */
+function useHeroZoom() {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (reducirMovimiento()) return undefined;
+    const el = ref.current;
+    if (!el) return undefined;
+    let tanda = 0;
+    const alScroll = () => {
+      tanda = 0;
+      const p = Math.min(1, window.scrollY / (window.innerHeight * 0.9));
+      el.style.setProperty("--hero-zoom", (1 - p * 0.05).toFixed(4));
+    };
+    const conTanda = () => { if (!tanda) tanda = requestAnimationFrame(alScroll); };
+    window.addEventListener("scroll", conTanda, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", conTanda);
+      if (tanda) cancelAnimationFrame(tanda);
+    };
+  }, []);
+  return ref;
+}
 
 /** Pesos que suben hasta su valor apenas carga la página (React Bits · CountUp). */
 function Pesos({ valor, duracion = 1.1 }) {
@@ -44,10 +79,10 @@ function Icono({ children }) {
   );
 }
 
-/** Tarjeta de servicio del panel oscuro (inspiración: tarjetas negras con chip lima). */
-function Servicio({ icono, titulo, texto, href, enlace }) {
+/** Tarjeta de servicio del panel oscuro (inspiración: tarjetas negras con chip de acento). */
+function Servicio({ icono, titulo, texto, href, enlace, delay = 0 }) {
   return (
-    <Reveal className="srv">
+    <Reveal className="srv" delay={delay}>
       <div className="srv-chips"><span className="chip"><Icono>{icono}</Icono></span></div>
       <h3>{titulo}</h3>
       <span className="srv-sep" aria-hidden="true"></span>
@@ -56,6 +91,37 @@ function Servicio({ icono, titulo, texto, href, enlace }) {
     </Reveal>
   );
 }
+
+const SERVICIOS = [
+  {
+    icono: <><rect x="5" y="2.5" width="14" height="19" /><path d="M8.5 7h7M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01" /></>,
+    titulo: "Calcular cuánto cuesta dar de comer",
+    href: "herramienta.html#calcular",
+    enlace: "Calcular",
+    texto: "Cargás cuántas personas comen, por edad y sexo, y calculamos el costo mensual con la canasta básica alimentaria oficial. Los resultados coinciden al centavo con los hogares tipo que publica el INDEC.",
+  },
+  {
+    icono: <path d="M3 7h17v13H3zM3 7V4h14v3M15.5 13.5h2.5" />,
+    titulo: "Organizar el mes",
+    href: "herramienta.html#presupuesto",
+    enlace: "Organizar",
+    texto: "Presupuesto de ingresos y gastos, despensa con lo que falta (y un pedido listo para WhatsApp) y registro de raciones servidas. Solo cantidades, nunca nombres.",
+  },
+  {
+    icono: <><circle cx="6" cy="12" r="2.5" /><circle cx="18" cy="5.5" r="2.5" /><circle cx="18" cy="18.5" r="2.5" /><path d="M8.2 10.8l7.6-4M8.2 13.2l7.6 4" /></>,
+    titulo: "Mostrar qué logra cada aporte",
+    href: "herramienta.html#compartir",
+    enlace: "Armar mi página",
+    texto: "Una página con enlace y QR donde quien quiere ayudar ve, en alimentos y días de comida, qué logra su donación, y puede armar una tarjeta de agradecimiento.",
+  },
+  {
+    icono: <><path d="M12 21s-7-5.2-7-11a7 7 0 1 1 14 0c0 5.8-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" /></>,
+    titulo: "Encontrar organizaciones",
+    href: "mapa.html",
+    enlace: "Ver el mapa",
+    texto: "Un mapa de comedores y merenderos que se sumaron por voluntad propia, con cómo ayudar a cada uno. El alias para donar solo aparece si una persona verificó a la organización.",
+  },
+];
 
 function BotonesAlta() {
   const copiar = useCopiar();
@@ -68,6 +134,7 @@ function BotonesAlta() {
 }
 
 export default function Landing() {
+  const refHero = useHeroZoom();
   return (
     <ToastProvider>
       <a className="skip" href="#principal">Saltar al contenido</a>
@@ -76,11 +143,13 @@ export default function Landing() {
 
         <main id="principal">
           {/* ═════════ PORTADA ═════════ */}
-          <section className="hero" aria-labelledby="h-hero">
-            <h1 id="h-hero" className="wordmark">Hornalla<em>.</em></h1>
+          <section className="hero" ref={refHero} aria-labelledby="h-hero">
+            <div className="hero-contenido">
+              <Marca />
 
-            <div className="fogata-zona">
-              <Fogata />
+              <div className="fogata-zona">
+                <Fogata />
+              </div>
             </div>
 
             <div className="hero-piso">
@@ -100,7 +169,7 @@ export default function Landing() {
                     <li><em>/03</em><span>Cero datos personales</span></li>
                   </ol>
                   <div className="hero-cta">
-                    <a className="btn btn-lima btn-lg" href="herramienta.html">Usar la herramienta gratis</a>
+                    <a className="btn btn-acento btn-lg" href="herramienta.html">Usar la herramienta gratis</a>
                     <a className="btn btn-ghost btn-lg" href="mapa.html">Ver el mapa</a>
                   </div>
                 </Reveal>
@@ -123,23 +192,12 @@ export default function Landing() {
           <section className="panel-oscuro" id="que-hacemos" aria-labelledby="h-hacemos">
             <Reveal className="panel-head">
               <p className="eyebrow">Qué hacemos</p>
-              <h2>Cuatro herramientas <mark>gratis</mark> para el día a día.</h2>
+              <h2>Cuatro herramientas <mark><span>gratis</span></mark> para el día a día.</h2>
               <p>Simples, pensadas para usarse desde el celular y sin instalar nada.</p>
             </Reveal>
             <div className="panel-in">
               <div className="grid-srv">
-                <Servicio icono={<><rect x="5" y="2.5" width="14" height="19" /><path d="M8.5 7h7M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01" /></>}
-                  titulo="Calcular cuánto cuesta dar de comer" href="herramienta.html#calcular" enlace="Calcular"
-                  texto="Cargás cuántas personas comen, por edad y sexo, y calculamos el costo mensual con la canasta básica alimentaria oficial. Los resultados coinciden al centavo con los hogares tipo que publica el INDEC." />
-                <Servicio icono={<path d="M3 7h17v13H3zM3 7V4h14v3M15.5 13.5h2.5" />}
-                  titulo="Organizar el mes" href="herramienta.html#presupuesto" enlace="Organizar"
-                  texto="Presupuesto de ingresos y gastos, despensa con lo que falta (y un pedido listo para WhatsApp) y registro de raciones servidas. Solo cantidades, nunca nombres." />
-                <Servicio icono={<><circle cx="6" cy="12" r="2.5" /><circle cx="18" cy="5.5" r="2.5" /><circle cx="18" cy="18.5" r="2.5" /><path d="M8.2 10.8l7.6-4M8.2 13.2l7.6 4" /></>}
-                  titulo="Mostrar qué logra cada aporte" href="herramienta.html#compartir" enlace="Armar mi página"
-                  texto="Una página con enlace y QR donde quien quiere ayudar ve, en alimentos y días de comida, qué logra su donación, y puede armar una tarjeta de agradecimiento." />
-                <Servicio icono={<><path d="M12 21s-7-5.2-7-11a7 7 0 1 1 14 0c0 5.8-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" /></>}
-                  titulo="Encontrar organizaciones" href="mapa.html" enlace="Ver el mapa"
-                  texto="Un mapa de comedores y merenderos que se sumaron por voluntad propia, con cómo ayudar a cada uno. El alias para donar solo aparece si una persona verificó a la organización." />
+                {SERVICIOS.map((s, i) => <Servicio key={s.titulo} delay={i} {...s} />)}
               </div>
             </div>
           </section>
@@ -224,7 +282,7 @@ export default function Landing() {
                     <li>Un lugar en el mapa, si querés y con tu consentimiento</li>
                   </ul>
                 </Reveal>
-                <Reveal className="panel lima" delay={1}>
+                <Reveal className="panel acento" delay={1}>
                   <h3>Qué no hacemos</h3>
                   <ul className="checklist no">
                     <li>No recibimos ni procesamos donaciones<small>Las transferencias van directo de quien dona a la cuenta de la organización.</small></li>
@@ -247,7 +305,7 @@ export default function Landing() {
                   <h2 id="h-mapa">Encontrá dónde y cómo ayudar.</h2>
                   <p>Cada organización aparece solo si lo pide y lo autoriza, y elige qué datos mostrar: dirección y contacto son opcionales. El alias para donar dinero solo se muestra en organizaciones que una persona verificó.</p>
                   <div className="hero-cta">
-                    <a className="btn btn-lima btn-lg" href="mapa.html">Ver el mapa</a>
+                    <a className="btn btn-acento btn-lg" href="mapa.html">Ver el mapa</a>
                     <BotonesAlta />
                   </div>
                 </Reveal>

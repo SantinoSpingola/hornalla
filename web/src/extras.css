@@ -3,20 +3,23 @@
  * y estilos de utilidades de todo el sitio.
  */
 
-/* ───────── Aparición al entrar en pantalla (Reveal.jsx) ─────────
-   CSS + IntersectionObserver. Nunca deja contenido en blanco. */
+/* Aparición al entrar en pantalla (Reveal.jsx): sube y se desenfoca, como en la referencia. */
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity .7s cubic-bezier(.22, 1, .36, 1), transform .7s cubic-bezier(.22, 1, .36, 1);
+  transform: translateY(30px);
+  filter: blur(10px);
+  transition:
+    opacity .75s cubic-bezier(.22, 1, .36, 1),
+    transform .75s cubic-bezier(.22, 1, .36, 1),
+    filter .75s cubic-bezier(.22, 1, .36, 1);
   transition-delay: var(--reveal-delay, 0ms);
 }
-.reveal.is-in { opacity: 1; transform: none; }
+.reveal.is-in { opacity: 1; transform: none; filter: blur(0); }
 @media (prefers-reduced-motion: reduce) {
-  .reveal { opacity: 1; transform: none; transition: none; }
+  .reveal { opacity: 1; transform: none; filter: none; transition: none; }
 }
 @media print {
-  .reveal { opacity: 1 !important; transform: none !important; }
+  .reveal { opacity: 1 !important; transform: none !important; filter: none !important; }
 }
 
 /* Titulares: SplitText arma sus propias cajas por palabra */
