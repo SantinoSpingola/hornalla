@@ -92,7 +92,7 @@ La página para donantes es **la parte con más riesgo**: Hornalla no cobra ni v
 | **Ahora a ~20 de noviembre** | Piloto. **Nada de prensa para esta herramienta.** |
 | **Cuando haya devolución** | Ajustar la herramienta con lo aprendido. Pedir permiso por escrito a quien quiera ser citada. |
 | **Ventana sugerida** | Alrededor del [**#DíaDeDar / Giving Tuesday**](https://www.givingtuesday.org): en 2026 corresponde al **martes 1 de diciembre** (calculado como el martes posterior al Día de Acción de Gracias; confirmar con la campaña local). Es cuando los medios buscan historias de solidaridad y las organizaciones piden ayuda. |
-| **Cómo** | Usar [prensa/COMUNICADO-CANASTA-SOLIDARIA.md](prensa/COMUNICADO-CANASTA-SOLIDARIA.md): empieza por las organizaciones y por el problema, no por vos. |
+| **Cómo** | Usar [prensa/COMUNICADO-HORNALLA.md](prensa/COMUNICADO-HORNALLA.md): empieza por las organizaciones y por el problema, no por vos. |
 
 **Historia para los medios (y es verdadera si el piloto sale bien):** «Una herramienta gratuita, hecha con datos oficiales, ayuda a comedores a calcular cuánto cuesta dar de comer y a pedir ayuda con números». Funciona porque es concreta, útil y está respaldada por quienes la usan, no por un discurso.
 

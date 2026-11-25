@@ -1,6 +1,6 @@
 # Hornalla — guía de lanzamiento
 
-Estado al 5-nov-2026: herramienta terminada y probada en `web/`, kit del piloto en `piloto/`, nombre elegido (ver [MARCA.md](MARCA.md)). **No está publicada**: publicar es una decisión tuya.
+Estado al 13-nov-2026: herramienta terminada y probada, kit del piloto en `piloto/`, nombre elegido (ver [MARCA.md](MARCA.md)). **Publicada en https://hornalla.vercel.app** como versión de prueba (`web/config.js` tiene `piloto: true`): difundirla masivamente sigue siendo una decisión tuya.
 
 > El Asadómetro quedó archivado en [`archivo/asadometro/`](archivo/asadometro/) (su guía original está en `LANZAMIENTO-ORIGINAL.md` dentro de esa carpeta).
 
@@ -10,7 +10,7 @@ Estado al 5-nov-2026: herramienta terminada y probada en `web/`, kit del piloto 
 |---|---|
 | **Nombre** | Búsqueda de antecedentes en el INPI, registrar el dominio y reservar usuarios. Detalle en [MARCA.md](MARCA.md). |
 | **Contacto** | Completar `web/config.js` con tu mail y/o WhatsApp. Sin eso, nadie puede devolverte comentarios desde el sitio, y en el inicio y en el mapa no aparece el botón «Sumá tu organización» (queda solo «Copiar mensaje de alta»). |
-| **Textos del inicio** | Leer `web/index.html` (quiénes somos, por qué, preguntas) y ajustarlo a tu voz. Si querés mostrar tu nombre, una foto o la historia detrás del proyecto, es el lugar; está escrito en tercera persona a propósito para no inventar nada. |
+| **Textos del inicio** | Leer `web/src/pages/Landing.jsx` (quiénes somos, por qué, preguntas) y ajustarlo a tu voz. Si querés mostrar tu nombre, una foto o la historia detrás del proyecto, es el lugar; está escrito en tercera persona a propósito para no inventar nada. |
 | **Dominio** | `hornalla.com.ar` o `hornalla.ar` (confirmar en nic.ar). Sin dominio propio sirve un subdominio gratuito para el piloto. |
 | **Términos del INDEC** | Los [términos](https://api.indec.gob.ar/ayuda/terminos) hablan de política de datos abiertos pero no detallan límites ni redistribución. Escribirles para avisar y preguntar es buena práctica. |
 | **Imagen de vista previa** | Falta `web/og.png` (1200×630) para que se vea bien al compartir el enlace. |
@@ -22,25 +22,36 @@ Estado al 5-nov-2026: herramienta terminada y probada en `web/`, kit del piloto 
 
 ## 2. Publicar (gratis, 10 minutos)
 
-El sitio es estático: **no contiene tu token ni llama a ninguna API desde el navegador**; los datos están en `web/canasta-data.js`.
+El sitio es estático una vez compilado: **no contiene tu token ni llama a ninguna API desde el navegador**; los datos están en `web/canasta-data.js` y se empaquetan al compilar.
 
-- **Cloudflare Pages / Netlify / Vercel:** proyecto nuevo, subir la carpeta `web/`. Sin comando de build; directorio de salida: `web`.
-- **GitHub Pages:** subir `web/` como raíz del sitio.
+- Compilar con `npm run build`: el sitio queda en `web/dist`.
+- **Vercel (el actual):** `npm run desplegar` compila y publica `web/dist`.
+- **Cloudflare Pages / Netlify / GitHub Pages:** subir la carpeta `web/dist` (o configurar `npm run build` con directorio de salida `web/dist`).
+- Para ver el sitio compilado en tu compu: `npm run preview` (no se puede abrir con doble clic: los módulos ES no funcionan con `file://`).
 - Después, apuntar el dominio.
 
-## 3. Cada mes (actualización, ~15 minutos)
+## 3. Cada mes: ya no hay que actualizar a mano
 
-La canasta la publica el INDEC junto con el IPC, a mediados de mes (el informe de julio salió el 13 de agosto). El de octubre se espera cerca del **12 de noviembre** (confirmar en el calendario oficial). Con `INDEC_API_TOKEN` configurado:
+La canasta la publica el INDEC junto con el IPC, a mediados de mes (el informe de julio salió el 13 de agosto). GitHub Actions corre solo los días 13 a 15 y 20 a 22, baja los datos, corre las pruebas y publica únicamente si cambió el contenido.
+
+Lo único que puede requerir tu intervención es el **token**:
+
+- `INDEC_API_TOKEN` es un JWT y **vence**. Cuando la actualización falla, GitHub abre un issue. Se genera uno nuevo en https://www.indec.gob.ar/apis y se actualiza en *Settings → Secrets and variables → Actions*.
+- Si Vercel no está conectado al repositorio, configurar `VERCEL_DEPLOY_HOOK` para que el despliegue salga igual.
+
+Para revisar el estado en cualquier momento: `npm run datos:estado` (con `-- --estricto` falla si falta el período esperado).
+
+Si preferís hacerlo a mano:
 
 ```bash
 npm run datos:canasta      # = node scripts/build-canasta-data.mjs
 npm run datos:precios
 npm test
+npm run desplegar
 ```
 
 - `build-precios-data.mjs` toma el último mes en que **todos** los alimentos tienen precio (nunca mezcla meses).
 - `build-canasta-data.mjs` **falla a propósito** si la cuenta no reproduce los valores de hogar que publica el INDEC. Si eso pasa, no se publica: se revisa.
-- Después, volver a subir `web/` (`npm run desplegar`).
 
 ## 4. Calendario sugerido
 

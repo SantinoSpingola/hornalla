@@ -1,0 +1,101 @@
+name: Actualizar datos del INDEC
+
+# El INDEC publica la canasta junto con el IPC, a mediados de mes (habitualmente
+# alrededor de las 16:00 de Argentina). Corremos varias veces por si la publicación
+# se demora: si los datos todavía no cambiaron, el script no hace commit.
+on:
+  schedule:
+    - cron: "0 20 13,14,15,20,21,22 * *" # 17:00 de Argentina
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: datos-indec
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Guardamos los datos anteriores para no commitear si solo cambió la fecha.
+      - name: Guardar datos anteriores
+        run: |
+          mkdir -p /tmp/datos-previos
+          cp web/canasta-data.js web/precios-data.js /tmp/datos-previos/
+
+      - name: Bajar canasta básica alimentaria
+        env:
+          INDEC_API_TOKEN: ${{ secrets.INDEC_API_TOKEN }}
+        run: npm run datos:canasta
+
+      - name: Bajar precios promedio de alimentos
+        env:
+          INDEC_API_TOKEN: ${{ secrets.INDEC_API_TOKEN }}
+        run: npm run datos:precios
+
+      - name: Correr las pruebas
+        run: npm test
+
+      - name: Ver si hay datos nuevos de verdad
+        id: cambios
+        run: node scripts/datos-cambiaron.mjs --prev /tmp/datos-previos
+
+      - name: Publicar el cambio
+        if: steps.cambios.outputs.cambiado == 'true'
+        run: |
+          git config user.name "Hornalla (robot)"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/canasta-data.js web/precios-data.js
+          git commit -m "datos: actualizar INDEC ($(date -u +%Y-%m-%d))"
+          git push
+
+      # Si Vercel está conectado al repositorio, el push ya dispara el despliegue.
+      # Este hook es un extra para cuando el despliegue se hace por otra vía.
+      - name: Avisar a Vercel
+        if: steps.cambios.outputs.cambiado == 'true' && env.VERCEL_DEPLOY_HOOK != ''
+        run: curl -fsS -X POST "$VERCEL_DEPLOY_HOOK"
+
+      - name: Avisar si algo falló
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITULO="⚠ No se pudieron actualizar los datos del INDEC"
+          EXISTENTE=$(gh issue list --state open --search "$TITULO in:title" --json number --jq '.[0].number')
+          CUERPO="Falló la actualización automática de datos (corrida: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+
+          Causas habituales:
+          - El token \`INDEC_API_TOKEN\` venció (es un JWT con fecha de expiración). Hay que generar uno nuevo y actualizar el secreto.
+          - El INDEC todavía no publicó el período o su API cambió.
+          - Las pruebas fallaron con los datos nuevos.
+
+          Mientras tanto, el sitio sigue publicado con los datos anteriores."
+          if [ -n "$EXISTENTE" ]; then
+            gh issue comment "$EXISTENTE" --body "$CUERPO"
+          else
+            gh issue create --title "$TITULO" --body "$CUERPO"
+          fi
+
+      - name: Cerrar el aviso cuando vuelve a funcionar
+        if: success() && steps.cambios.outputs.cambiado == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITULO="⚠ No se pudieron actualizar los datos del INDEC"
+          gh issue list --state open --search "$TITULO in:title" --json number --jq '.[].number' \
+            | xargs -r -I{} gh issue close {} --comment "Los datos se actualizaron correctamente. Cierro este aviso."

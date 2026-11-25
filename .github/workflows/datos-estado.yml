@@ -1,0 +1,53 @@
+name: Revisar que los datos estén al día
+
+# Los lunes revisa si falta el período que ya debería estar publicado.
+# No modifica nada: solo avisa con un issue si hay atraso.
+on:
+  schedule:
+    - cron: "0 12 * * 1" # lunes a las 09:00 de Argentina
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  estado:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Revisar vigencia
+        run: npm run datos:estado -- --estricto
+
+      - name: Avisar si hay atraso
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITULO="⚠ Hay datos del INDEC sin actualizar"
+          EXISTENTE=$(gh issue list --state open --search "$TITULO in:title" --json number --jq '.[0].number')
+          CUERPO="El chequeo semanal encontró que los datos publicados no están al día (corrida: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+
+          Corré \`npm run datos:estado\` en tu computadora para ver el detalle. Si el token venció, generá uno nuevo en https://www.indec.gob.ar/apis y actualizá el secreto \`INDEC_API_TOKEN\`.
+
+          El sitio sigue funcionando con los datos anteriores."
+          if [ -n "$EXISTENTE" ]; then
+            gh issue comment "$EXISTENTE" --body "$CUERPO"
+          else
+            gh issue create --title "$TITULO" --body "$CUERPO"
+          fi
+
+      - name: Cerrar el aviso cuando vuelve a estar al día
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITULO="⚠ Hay datos del INDEC sin actualizar"
+          gh issue list --state open --search "$TITULO in:title" --json number --jq '.[].number' \
+            | xargs -r -I{} gh issue close {} --comment "Los datos volvieron a estar al día. Cierro este aviso."

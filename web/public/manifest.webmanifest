@@ -1,0 +1,51 @@
+{
+  "name": "Hornalla — Herramientas para comedores y merenderos",
+  "short_name": "Hornalla",
+  "description": "Calculá cuánto cuesta dar de comer con datos del INDEC, organizá el mes de tu comedor y mostrá qué logra cada aporte. Gratis, sin registro y sin datos personales.",
+  "lang": "es-AR",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#0b6e5f",
+  "categories": ["productivity", "utilities", "education"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Calcular cuánto cuesta",
+      "short_name": "Calcular",
+      "url": "/herramienta.html#calcular"
+    },
+    {
+      "name": "Ver el mapa",
+      "short_name": "Mapa",
+      "url": "/mapa.html"
+    },
+    {
+      "name": "Instructivo para imprimir",
+      "short_name": "Instructivo",
+      "url": "/instructivo.html"
+    }
+  ]
+}
