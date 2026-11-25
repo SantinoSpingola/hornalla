@@ -68,7 +68,7 @@ Y para aplicarlo, el mismo comando con `--aplicar`. Después reescribir este arc
 - **Colores (claro):** fondo `#F3F4F6` · superficie `#FFFFFF` · texto `#11151C` · gris `#586172` · línea `#E1E4EA` · acento verde petróleo `#0B6E5F` (con texto blanco: 6,2:1) · barra lateral `#12161D`. La llama naranja `#EC6A3D` vive solo en el logo y en el indicador de la sección activa.
 - **Colores (oscuro):** fondo `#0D1015` · superficie `#151A21` · texto `#ECEFF4` · acento `#3FB59F`.
 - **Tipografía:** **Public Sans** (Google Fonts) en toda la interfaz, con cifras tabulares. Ya no hay serif.
-- **Logo:** el aro de una hornalla con una llama encendida adentro y «Hornalla» en Public Sans negrita (`web/herramienta.html`; el favicon es un cuadrado oscuro con el mismo aro).
+- **Logo:** la fogata ilustrada (`web/public/logo.png`, recortada de la animación) y «Hornalla» en Public Sans negrita. El favicon es `web/public/favicon.png`. La fogata animada de la portada es `web/public/fogata.webm` (VP9 con transparencia, 700×520, sin audio) con `fogata-poster.png` de respaldo. Las tarjetas para compartir también dibujan la fogata. El aro con llama de antes ya no se usa.
 - **El acento se usa poco:** la cifra principal, el botón primario y la llama. Todo lo demás es neutro.
 - **Tarjetas para compartir** (1080×1350): mismo lenguaje (blanco, texto grafito, cifra en verde petróleo y llama naranja en el logo), con un QR.
 - **Sin** fotos de personas, ni de niñas y niños, ni de filas. Los números alcanzan.

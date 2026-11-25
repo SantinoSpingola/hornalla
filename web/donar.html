@@ -3,127 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ayudá a dar de comer — Hornalla</title>
-  <meta name="description" content="Mirá, con datos oficiales del INDEC, qué logra tu aporte a este comedor y cómo donar. Podés armar una tarjeta de agradecimiento.">
+  <title>AyudÃ¡ a dar de comer â€” Hornalla</title>
+  <meta name="description" content="MirÃ¡, con datos oficiales del INDEC, quÃ© logra tu aporte a este comedor y cÃ³mo donar. PodÃ©s armar una tarjeta de agradecimiento.">
   <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#0b6e5f">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Ayudá a dar de comer">
-  <meta property="og:description" content="Mirá qué logra tu aporte, con datos oficiales del INDEC.">
+  <meta property="og:title" content="AyudÃ¡ a dar de comer">
+  <meta property="og:description" content="MirÃ¡ quÃ© logra tu aporte, con datos oficiales del INDEC.">
   <meta property="og:locale" content="es_AR">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='0' fill='%23161513'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%23FBFAF8' stroke-width='2.4'/%3E%3Cpath d='M16 8.500c.7 3.100 4 4.600 4 8a4 4 0 0 1-8 0c0-1.800 1-2.900 1.800-4.100.6 1.100 1.100 1.700 1.800 1.700-.5-1.900-.5-3.700.4-5.600z' fill='%23E0653B'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="estilo.css">
+
 </head>
 <body>
-  <a class="skip" href="#aporte">Saltar al contenido</a>
-  <main class="donor">
-    <div class="donor-top">
-      <a class="logo" href="./" aria-label="Hornalla">
-        <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12.5" fill="none" stroke="currentColor" stroke-width="2.6"/><path class="llama" d="M16 6.800c.9 4 5.200 5.900 5.200 10.300a5.200 5.200 0 0 1-10.400 0c0-2.300 1.400-3.700 2.300-5.300.8 1.500 1.500 2.300 2.300 2.300-.7-2.500-.7-4.800.6-7.300z"/></svg>
-        <span>Hornalla</span>
-      </a>
-      <span class="xs muted">Página de donaciones</span>
-    </div>
-
-    <header>
-      <h1 id="dOrg">Ayudá a dar de comer</h1>
-      <p class="lead" id="dNota"></p>
-    </header>
-
-    <div class="card progress-card" id="dProgreso" hidden>
-      <p class="small muted" id="dProgTitulo"></p>
-      <p class="big" id="dProgBig" style="margin-top:6px"></p>
-      <div class="bar lg" id="dBarraWrap" style="margin-top:14px"><i id="dBarra" style="width:0"></i></div>
-      <p class="small" id="dFaltan" style="margin-top:12px"></p>
-      <p class="xs muted" style="margin-top:8px">Datos informados por la propia organización. Hornalla no los verifica.</p>
-    </div>
-    <p class="small muted" id="dServidas" hidden style="margin-top:14px"></p>
-
-    <section id="aporte">
-      <h2>¿Cuánto querés aportar?</h2>
-      <div class="chips" id="dFijos" role="group" aria-label="Montos sugeridos"></div>
-      <div class="stack" id="dSentido" style="margin-top:16px; gap:8px"></div>
-      <div class="field amount-field" style="margin-top:16px">
-        <label for="dMonto">Otro monto</label>
-        <div class="money"><span>$</span><input id="dMonto" class="input" type="text" inputmode="numeric" autocomplete="off" placeholder="0"></div>
-      </div>
-    </section>
-
-    <p class="small muted" id="dAyudaMonto" style="margin-top:16px">Elegí un monto, el que quieras y puedas, para ver en concreto qué logra tu aporte.</p>
-
-    <section id="dImpacto" hidden aria-live="polite">
-      <h2>Tu aporte, concretamente</h2>
-      <div class="card impact">
-        <p class="impact-main" id="dMain"></p>
-        <p class="small muted" id="dServicioExp" style="margin-top:8px"></p>
-        <ul class="bullets" id="dBullets"></ul>
-        <h3 class="label" style="margin-top:24px; font-size:.8125rem; color:var(--muted); font-weight:600">Para ponerlo en alimentos</h3>
-        <div class="buys" id="dBuys"></div>
-        <p class="xs muted" style="margin-top:12px" id="dBuysNota"></p>
-      </div>
-    </section>
-
-    <section id="dComoDonar">
-      <h2>Cómo donar</h2>
-      <div id="dBloqueado" class="callout warn" hidden><strong>Este enlace fue desactivado.</strong> Recibimos un aviso de uso indebido del alias que figuraba acá. <strong>No transfieras.</strong> Si querés ayudar a un comedor, contactalo por otro canal de confianza.</div>
-      <div id="dSinAlias" class="callout" hidden>Esta organización todavía no indicó cómo recibir donaciones. Contactala directamente para coordinar.</div>
-      <div id="dConAlias" hidden>
-        <div class="alias-box">
-          <div><div class="xs muted">Alias o CBU/CVU</div><div class="al" id="dAlias"></div></div>
-          <button type="button" class="btn" id="dCopiarAlias">Copiar</button>
-        </div>
-        <p class="small" id="dTitular" style="margin-top:12px" hidden></p>
-        <ol class="small" style="margin:16px 0 0; padding-left:20px; display:grid; gap:6px">
-          <li>Abrí tu app bancaria o billetera virtual y elegí transferir.</li>
-          <li>Pegá el alias y, <strong>antes de confirmar</strong>, comprobá que el nombre del titular que te muestra la app coincida con el de arriba.</li>
-          <li>Hacé la transferencia y volvé acá para armar tu tarjeta.</li>
-        </ol>
-      </div>
-      <div class="callout warn" style="margin-top:16px"><strong>Antes de transferir:</strong> Hornalla <strong>no recibe, procesa ni verifica donaciones</strong>. Esta página la armó la propia organización y Hornalla no puede comprobar que los datos sean ciertos. Si no conocés a la organización, confirmá el alias por otro canal de confianza (llamada, redes oficiales, alguien que la conozca). <strong>Si algo no te cierra, no transfieras.</strong></div>
-    </section>
-
-    <section id="dTarjeta">
-      <h2>¿Ya donaste? Armá tu tarjeta</h2>
-      <p class="small muted">Una tarjeta para agradecer y para que más personas se sumen. Se arma en tu dispositivo: no subimos nada.</p>
-      <div class="form-grid cols-2" style="margin-top:16px">
-        <div class="field"><label for="dNombre">Tu nombre o apodo <span class="muted">(opcional)</span></label><input id="dNombre" class="input" type="text" maxlength="30" autocomplete="off" placeholder="Ej.: Lucía"></div>
-        <div class="field"><label for="dMontoTarjeta">Monto que aportaste</label><div class="money"><span>$</span><input id="dMontoTarjeta" class="input" type="text" inputmode="numeric" autocomplete="off" placeholder="0"></div></div>
-      </div>
-      <button type="button" class="btn btn-primary" id="dBtnTarjeta" style="margin-top:16px">Armar mi tarjeta</button>
-      <div class="card-preview" id="dPreview" hidden>
-        <canvas id="dCanvas" width="1080" height="1350" aria-label="Vista previa de tu tarjeta de donante"></canvas>
-        <div class="row" style="margin-top:16px">
-          <button type="button" class="btn btn-primary" id="dBtnDescargar">Descargar / compartir</button>
-          <button type="button" class="btn" id="dBtnInvitar">Copiar mensaje para invitar</button>
-        </div>
-      </div>
-      <p class="xs muted" style="margin-top:12px">Es una tarjeta simbólica y la completás vos: <strong>no es un comprobante de pago</strong> ni prueba que hayas donado.</p>
-    </section>
-
-    <details class="help" style="margin-top:48px">
-      <summary>Cómo se calcula todo esto</summary>
-      <p>El valor de un día de comida sale de la <strong>canasta básica alimentaria del INDEC</strong> (Gran Buenos Aires, <span id="dEdicion"></span>), ajustada por edad y sexo con la tabla oficial de «adultos equivalentes». Un <strong>servicio</strong> es lo que el comedor sirve a una persona en un día, según la porción de la canasta diaria que la propia organización informó. Las equivalencias en alimentos usan los <strong>precios promedio del INDEC</strong>: son una referencia, no lo que la organización vaya a comprar. Todo es aritmética con datos públicos; no prometemos un resultado.</p>
-    </details>
-  </main>
-
-  <footer class="footer" style="max-width:720px">
-    <p>Hornalla · Proyecto independiente y gratuito: no es oficial ni está afiliado al INDEC ni a ningún organismo. Sin cookies, sin analíticas y sin publicidad.</p>
-    <p><a href="mapa.html">Mapa de comedores y merenderos</a> · <a href="herramienta.html">Armá la página de tu comedor</a></p>
-  </footer>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-  <script src="config.js"></script>
-  <script src="canasta-data.js"></script>
-  <script src="precios-data.js"></script>
-  <script src="referencia.js"></script>
-  <script src="formato.js"></script>
-  <script src="canasta-lib.js"></script>
-  <script src="donante-lib.js"></script>
-  <script src="vendor/qrcode.js"></script>
-  <script src="tarjetas.js"></script>
-  <script src="donar.js"></script>
-  <script src="micro.js"></script>
+  <div id="root"></div>
+  <noscript><p style="padding:24px;font-family:sans-serif">Hornalla necesita JavaScript para funcionar. Activalo en tu navegador y volvÃ© a cargar la pÃ¡gina.</p></noscript>
+  <script type="module" src="/src/main-donar.jsx"></script>
 </body>
 </html>

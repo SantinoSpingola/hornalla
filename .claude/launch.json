@@ -1,6 +1,6 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "hornalla", "runtimeExecutable": "node", "runtimeArgs": ["scripts/serve-web.mjs", "4173"], "port": 4173 }
+    { "name": "hornalla", "runtimeExecutable": "node", "runtimeArgs": ["node_modules/vite/bin/vite.js"], "port": 4173 }
   ]
 }

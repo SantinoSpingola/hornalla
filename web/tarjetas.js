@@ -12,10 +12,23 @@
   var SANS = '"Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
   var LLAMA = "M16 6.8c.9 4 5.2 5.9 5.2 10.3a5.2 5.2 0 0 1-10.4 0c0-2.3 1.4-3.7 2.3-5.3.8 1.5 1.5 2.3 2.3 2.3-.7-2.5-.7-4.8.6-7.3z";
 
+  /** La fogata del logo (web/public/logo.png). Se carga junto con las fuentes; si falta, se dibuja la llama de siempre. */
+  var LOGO = null;
+  function cargarLogo() {
+    return new Promise(function (resolve) {
+      if (typeof Image === "undefined") { resolve(); return; }
+      var img = new Image();
+      img.onload = function () { LOGO = img; resolve(); };
+      img.onerror = function () { resolve(); };
+      img.src = "/logo.png";
+    });
+  }
+
   /** Las fuentes que solo se usan en el canvas no se cargan solas: hay que pedirlas. */
   function cargarFuentes() {
-    if (!document.fonts || !document.fonts.load) return Promise.resolve();
-    return Promise.all([
+    var logo = LOGO ? Promise.resolve() : cargarLogo();
+    if (!document.fonts || !document.fonts.load) return logo;
+    return Promise.all([logo,
       document.fonts.load('700 40px "Public Sans"'),
       document.fonts.load('600 40px "Public Sans"'),
       document.fonts.load('500 24px "Public Sans"'),
@@ -35,15 +48,22 @@
   function espaciado(c, px) { if ("letterSpacing" in c) c.letterSpacing = px + "px"; }
 
   function logo(c, x, y) {
-    c.save();
-    c.translate(x, y - 36);
-    c.scale(44 / 32, 44 / 32);
-    c.strokeStyle = TEXT; c.lineWidth = 3;
-    c.beginPath(); c.arc(16, 16, 12.5, 0, Math.PI * 2); c.stroke();
-    c.fillStyle = FLAME; c.fill(new Path2D(LLAMA));
-    c.restore();
+    var ancho = 62;
+    if (LOGO && LOGO.naturalWidth) {
+      var alto = Math.round(LOGO.naturalHeight * 62 / LOGO.naturalWidth) + 14;
+      ancho = Math.round(LOGO.naturalWidth * alto / LOGO.naturalHeight);
+      c.drawImage(LOGO, x, y - alto + 8, ancho, alto);
+    } else {
+      c.save();
+      c.translate(x, y - 36);
+      c.scale(44 / 32, 44 / 32);
+      c.strokeStyle = TEXT; c.lineWidth = 3;
+      c.beginPath(); c.arc(16, 16, 12.5, 0, Math.PI * 2); c.stroke();
+      c.fillStyle = FLAME; c.fill(new Path2D(LLAMA));
+      c.restore();
+    }
     c.fillStyle = TEXT; c.font = "700 52px " + SERIF;
-    c.fillText("Hornalla", x + 62, y);
+    c.fillText("Hornalla", x + ancho + 16, y);
   }
 
   function etiqueta(c, texto, x, y) {
