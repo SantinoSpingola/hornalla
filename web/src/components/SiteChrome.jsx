@@ -19,17 +19,19 @@ export function SiteHeader({ actual }) {
     <header className="site-header">
       <div className="site-header-in">
         <Logo />
-        <button ref={btn} type="button" className="menu-btn" aria-expanded={abierto} aria-controls="menu" onClick={() => setAbierto((a) => !a)}>
-          <i></i><i></i><i></i><span className="visually-hidden">Menú</span>
-        </button>
         <nav className={"site-nav" + (abierto ? " open" : "")} id="menu" aria-label="Principal" onClick={(e) => { if (e.target.closest("a")) setAbierto(false); }}>
           <a href="./#quienes">Quiénes somos</a>
           <a href="./#que-hacemos">Qué hacemos</a>
-          <a href="./#por-que">Por qué</a>
           <a href="mapa.html" aria-current={actual === "mapa" ? "page" : undefined}>Mapa</a>
+          <a href="instructivo.html">Instructivo</a>
           <a href="./#preguntas">Preguntas</a>
-          <a className="btn btn-primary btn-sm" href="herramienta.html">Usar la herramienta</a>
         </nav>
+        <div className="header-cta">
+          <a className="btn btn-lima" href="herramienta.html">Usar la herramienta →</a>
+        </div>
+        <button ref={btn} type="button" className="menu-btn" aria-expanded={abierto} aria-controls="menu" onClick={() => setAbierto((a) => !a)}>
+          <i></i><i></i><i></i><span className="visually-hidden">Menú</span>
+        </button>
       </div>
     </header>
   );
@@ -39,6 +41,7 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="site-footer-in">
+        <p className="footer-marca" aria-hidden="true">Hornalla<em>.</em></p>
         <div>
           <Logo />
           <p>Herramientas gratuitas para comedores, merenderos y organizaciones que dan de comer.</p>

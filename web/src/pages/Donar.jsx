@@ -161,6 +161,7 @@ function Pagina() {
   return (
     <>
       <a className="skip" href="#aporte">Saltar al contenido</a>
+      <div className="pagina pagina-simple">
       <main className="donor">
         <div className="donor-top">
           <Logo href="./" label="Hornalla" />
@@ -203,6 +204,7 @@ function Pagina() {
         <p>Hornalla · Proyecto independiente y gratuito: no es oficial ni está afiliado al INDEC ni a ningún organismo. Sin cookies, sin analíticas y sin publicidad.</p>
         <p><a href="mapa.html">Mapa de comedores y merenderos</a> · <a href="herramienta.html">Armá la página de tu comedor</a></p>
       </footer>
+      </div>
     </>
   );
 }

@@ -1,10 +1,10 @@
 /*
  * Ajustes para integrar los componentes de React Bits al lenguaje visual de Hornalla
- * (esquinas rectas, bordes de 1 px, verde petróleo como único acento).
+ * y estilos de utilidades de todo el sitio.
  */
 
-/* Aparición al entrar en pantalla: CSS + IntersectionObserver (ver Reveal.jsx).
-   Nunca deja contenido en blanco: si el observador no corre, se muestra igual. */
+/* ───────── Aparición al entrar en pantalla (Reveal.jsx) ─────────
+   CSS + IntersectionObserver. Nunca deja contenido en blanco. */
 .reveal {
   opacity: 0;
   transform: translateY(24px);
@@ -19,6 +19,28 @@
   .reveal { opacity: 1 !important; transform: none !important; }
 }
 
+/* Titulares: SplitText arma sus propias cajas por palabra */
+.hero h1 .split-parent,
+.panel-head h2 .split-parent,
+h2 .split-parent { display: inline; }
+
+/* ───────── Logo ───────── */
+.logo .logo-img { width: auto; height: 34px; display: block; flex: none; }
+.side-brand .logo .logo-img { height: 38px; }
+.site-footer .logo .logo-img { height: 38px; }
+.logo { gap: 12px; }
+
+/* ───────── Cinta en movimiento (ScrollVelocity) ───────── */
+.cinta .parallax { display: block; }
+.cinta .scroller {
+  font-family: inherit;
+  font-size: .9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: .12em;
+  text-align: left;
+}
+
 /* ───────── Instalar la app y aviso sin conexión ───────── */
 .instalar-app {
   position: fixed;
@@ -30,20 +52,21 @@
   gap: 8px;
   min-height: 40px;
   padding: 6px 10px 6px 8px;
-  background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--line-strong);
-  box-shadow: var(--shadow-pop);
+  background: #ffffff;
+  color: #161810;
+  border: 1px solid #e3e5d8;
+  border-radius: 999px;
+  box-shadow: 0 16px 40px rgba(18, 20, 8, .18);
   font: inherit;
   font-size: .875rem;
   font-weight: 600;
   cursor: pointer;
   animation: aparece 320ms var(--ease) both;
 }
-.instalar-app:hover { border-color: var(--text); }
-.instalar-app img { display: block; width: 22px; height: 22px; }
-.instalar-app .cerrar { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-left: 2px; color: var(--muted); font-size: 1.125rem; font-weight: 400; line-height: 1; }
-.instalar-app .cerrar:hover { color: var(--text); }
+.instalar-app:hover { border-color: #161810; }
+.instalar-app img { display: block; width: 22px; height: 22px; border-radius: 7px; }
+.instalar-app .cerrar { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-left: 2px; color: #5d6252; font-size: 1.125rem; font-weight: 400; line-height: 1; }
+.instalar-app .cerrar:hover { color: #161810; }
 @media (max-width: 480px) { .instalar-app { font-size: .8125rem; } }
 
 .aviso-offline {
@@ -61,80 +84,6 @@
   text-align: center;
 }
 body:has(.aviso-offline) .instalar-app { bottom: calc(52px + env(safe-area-inset-bottom)); }
-/* En la herramienta hay una barra de navegación abajo: el botón va arriba de ella. */
 @media (max-width: 959px) {
   body:has(.sidebar) .instalar-app { bottom: calc(var(--nav-h) + 12px + env(safe-area-inset-bottom)); }
-}
-
-/* Titular de la portada: SplitText arma sus propias cajas por palabra */
-.hero h1 .split-parent { display: inline; }
-.hero h1 em .split-parent { display: inline; }
-
-/* Tarjetas de servicio con foco de luz: se integran a la grilla de 1 px */
-.feat.spotlight-card { border-radius: 0; box-shadow: none; padding: var(--s5); background-color: var(--surface); overflow: hidden; }
-.feat.spotlight-card:hover { background-color: var(--surface); }
-.feat.spotlight-card .spotlight-card__border { display: none; }
-.feat.spotlight-card > * { position: relative; z-index: 2; }
-.feat.spotlight-card .spotlight-card__light, .feat.spotlight-card .spotlight-card__grain, .feat.spotlight-card .spotlight-card__edge { z-index: 1; }
-.feat.spotlight-card .spotlight-card__light { z-index: 0; }
-.feat.spotlight-card::before { z-index: 3; }
-.sec.alt .feat.spotlight-card { background-color: var(--surface); }
-
-/* El contenedor de <Reveal> no debe alterar el ancho de lo que envuelve */
-.fact, .panel, .faq, .map-counter { min-width: 0; }
-
-/* ───────── Portada con más movimiento ───────── */
-.hero::before { display: none; } /* la grilla estática la reemplaza el fondo de puntos */
-.hero-fondo { position: absolute; inset: 0; pointer-events: none; -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%); mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%); }
-.hero-fondo .dot-grid { position: absolute; inset: 0; }
-.hero-card-wrap { width: 100% !important; box-shadow: 0 20px 50px rgba(0, 0, 0, .35); }
-.hero-card-wrap .hero-card { box-shadow: none; }
-.iman { display: inline-block; }
-.hero .eyebrow .shiny-text { font-weight: inherit; letter-spacing: inherit; }
-
-/* Cinta */
-.cinta { border-block: 1px solid var(--line); background: var(--surface); color: var(--muted); padding: 14px 0; overflow: hidden; letter-spacing: .12em; }
-.cinta .parallax { display: block; }
-.cinta .scroller { font-family: inherit; font-size: .9375rem; line-height: 1.4; letter-spacing: .12em; filter: none; text-align: left; }
-@media (min-width: 768px) { .cinta .scroller { font-size: .9375rem; line-height: 1.4; } }
-.cinta-quieta { text-align: center; font-size: .8125rem; letter-spacing: .12em; text-transform: uppercase; padding: 0 var(--s4); }
-
-/* Frase destacada de «Quiénes somos» */
-.big-reveal { margin: 0 !important; }
-.big-reveal-text { font-size: clamp(1.25rem, 2.4vw, 1.5rem); line-height: 1.4; letter-spacing: -.015em; font-weight: 500; color: var(--text); }
-
-/* ───────── Logo (fogata) ───────── */
-.logo .logo-img { width: auto; height: 34px; display: block; flex: none; }
-.side-brand .logo .logo-img { height: 38px; }
-.site-footer .logo .logo-img { height: 38px; }
-.logo { gap: 12px; }
-
-/* ───────── Fogata de la portada ───────── */
-.hero-der { display: grid; justify-items: center; gap: 0; min-width: 0; width: 100%; }
-.fogata { position: relative; width: min(100%, 440px); margin-bottom: -4px; z-index: 1; pointer-events: none; }
-.fogata-video { display: block; width: 100%; height: auto; filter: drop-shadow(0 18px 28px rgba(0, 0, 0, .35)); }
-.fogata-halo { position: absolute; left: 50%; top: 46%; width: 92%; aspect-ratio: 1; transform: translate(-50%, -50%); background: radial-gradient(closest-side, rgba(236, 106, 61, .38), rgba(236, 106, 61, .1) 55%, transparent 75%); filter: blur(6px); animation: halo 3.2s ease-in-out infinite alternate; }
-@keyframes halo { from { opacity: .55; transform: translate(-50%, -50%) scale(.94); } to { opacity: 1; transform: translate(-50%, -50%) scale(1.06); } }
-.hero-der .hero-card-wrap { position: relative; z-index: 2; }
-@media (max-width: 959px) { .fogata { width: min(78%, 320px); margin-bottom: -4px; } }
-@media (prefers-reduced-motion: reduce) { .fogata-halo { animation: none; } }
-
-/* ───────── Portada en celular ─────────
-   Menos aire, botones a lo ancho y una fogata más chica para que la tarjeta
-   del costo entre en la primera pantalla. */
-@media (max-width: 767px) {
-  .hero-in { gap: var(--s5); padding-top: clamp(32px, 9vw, 52px); padding-bottom: clamp(36px, 10vw, 56px); }
-  .hero h1 { font-size: clamp(1.9375rem, 9.6vw, 2.5rem); max-width: none; }
-  .hero .lead { margin-top: var(--s4); font-size: 1rem; line-height: 1.55; }
-  .hero-cta { margin-top: var(--s5); gap: var(--s2); }
-  .hero-cta .iman { display: block; width: 100%; }
-  .hero-cta .btn { width: 100%; justify-content: center; }
-  .hero-note { margin-top: var(--s3); }
-  .hero-der { gap: var(--s2); }
-  .fogata { width: min(56%, 200px); margin-bottom: -10px; }
-  .hero-card { padding: var(--s4); }
-  .hero-card .big { font-size: clamp(2rem, 12vw, 2.75rem); }
-  .hero-card dl { margin-top: var(--s3); }
-  .facts-in { grid-template-columns: minmax(0, 1fr); }
-  .fact { padding: var(--s5) var(--s4); }
 }

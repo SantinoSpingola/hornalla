@@ -18,6 +18,7 @@ export default function Instructivo() {
   const ex = ejemplo();
   const url = esWeb() ? location.origin + location.pathname.replace(/instructivo(\.html)?$/, "") : "(la dirección donde esté publicada)";
   return (
+    <div className="pagina pagina-simple">
     <main className="sheet">
       <p className="no-print" style={{ marginBottom: 24 }}><a href="herramienta.html">← Volver a la herramienta</a> · <button type="button" className="btn btn-sm" onClick={() => window.print()}>Imprimir</button></p>
       <p className="small muted">Hornalla · herramienta gratuita</p>
@@ -52,5 +53,6 @@ export default function Instructivo() {
 
       <p className="xs muted" style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid var(--line)" }}>Proyecto independiente y gratuito: no es oficial ni está afiliado al INDEC ni a ningún organismo. Datos: INDEC (canasta básica alimentaria, Gran Buenos Aires, {MES}). Tabla de adultos equivalentes: INDEC, Metodología N° 22. Si algo no te sirve o está mal, avisá y se corrige.</p>
     </main>
+    </div>
   );
 }

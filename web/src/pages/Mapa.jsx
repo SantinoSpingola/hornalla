@@ -202,7 +202,8 @@ function Pagina() {
   return (
     <>
       <a className="skip" href="#mapaWrap">Saltar al mapa</a>
-      <SiteHeader actual="mapa" />
+      <div className="pagina">
+        <SiteHeader actual="mapa" />
 
       <main className="wrap ancha mapa-page" id="principal">
         <div className="panel-head">
@@ -290,6 +291,7 @@ function Pagina() {
       </main>
 
       <SiteFooter />
+      </div>
     </>
   );
 }

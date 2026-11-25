@@ -63,14 +63,18 @@ Y para aplicarlo, el mismo comando con `--aplicar`. Después reescribir este arc
 
 ## Identidad visual
 
-**Institucional, sobria y simple.** Esquinas rectas, bordes de 1 px, sin sombras ni texturas, una sola tipografía, un único color de acento y modo oscuro automático. Navegación en barra lateral (escritorio) o barra inferior (celular). Los movimientos son breves (120–260 ms), solo dan feedback o ubican al usuario, y se apagan con «reducir movimiento».
+**Dos capas.**
 
-- **Colores (claro):** fondo `#F3F4F6` · superficie `#FFFFFF` · texto `#11151C` · gris `#586172` · línea `#E1E4EA` · acento verde petróleo `#0B6E5F` (con texto blanco: 6,2:1) · barra lateral `#12161D`. La llama naranja `#EC6A3D` vive solo en el logo y en el indicador de la sección activa.
-- **Colores (oscuro):** fondo `#0D1015` · superficie `#151A21` · texto `#ECEFF4` · acento `#3FB59F`.
+- **Sitio público (inicio, mapa, donar, instructivo):** lenguaje de referencia SaaS (rediseño 2026, inspirado en el hero de Sapforce): todo el sitio dentro de una «página» flotante con esquinas muy redondeadas (radio 24–32 px), tipografía gigante con la marca a ancho completo («HORNALLA.» con el punto en lima), cabecera flotante en pastilla, fogata centrada superpuesta a la marca, paneles oscuros con tarjetas oscuras y un acento **lima** `#CDF55A` (con texto `#15170A`). El naranja llama `#EC6A3D` queda solo en la fogata.
+- **Herramienta (app):** institucional, sobria y simple. Esquinas rectas, bordes de 1 px, sin sombras ni texturas, una sola tipografía, un único color de acento y modo oscuro automático. Navegación en barra lateral (escritorio) o barra inferior (celular). Los movimientos son breves (120–260 ms), solo dan feedback o ubican al usuario, y se apagan con «reducir movimiento».
+
+- **Colores del sitio público:** papel `#DFE0D8` · página `#FFFFFF` · texto `#161810` · gris `#5D6252` · línea `#E3E5D8` · tinta `#121408` (paneles oscuros, texto `#F2F4E8` / suave `#A8AD9A`) · acento lima `#CDF55A`. Siempre claro, aunque el sistema pida modo oscuro.
+- **Colores de la herramienta (claro):** fondo `#F3F4F6` · superficie `#FFFFFF` · texto `#11151C` · gris `#586172` · línea `#E1E4EA` · acento verde petróleo `#0B6E5F` (con texto blanco: 6,2:1) · barra lateral `#12161D`. La llama naranja `#EC6A3D` vive solo en el logo y en el indicador de la sección activa.
+- **Colores de la herramienta (oscuro):** fondo `#0D1015` · superficie `#151A21` · texto `#ECEFF4` · acento `#3FB59F`.
 - **Tipografía:** **Public Sans** (Google Fonts) en toda la interfaz, con cifras tabulares. Ya no hay serif.
 - **Logo:** la fogata ilustrada (`web/public/logo.png`, recortada de la animación) y «Hornalla» en Public Sans negrita. El favicon es `web/public/favicon.png`. La fogata animada de la portada es `web/public/fogata.webm` (VP9 con transparencia, 700×520, sin audio) con `fogata-poster.png` de respaldo. Las tarjetas para compartir también dibujan la fogata. El aro con llama de antes ya no se usa.
-- **El acento se usa poco:** la cifra principal, el botón primario y la llama. Todo lo demás es neutro.
-- **Tarjetas para compartir** (1080×1350): mismo lenguaje (blanco, texto grafito, cifra en verde petróleo y llama naranja en el logo), con un QR.
+- **El acento se usa poco:** la cifra principal, el botón primario y los destacados. Todo lo demás es neutro.
+- **Tarjetas para compartir** (1080×1350): mismo lenguaje (blanco, texto grafito, cifra en verde petróleo y llama naranja en el logo), con un QR. Pendiente llevarlas al nuevo lenguaje del sitio público.
 - **Sin** fotos de personas, ni de niñas y niños, ni de filas. Los números alcanzan.
 
 ## Voz
