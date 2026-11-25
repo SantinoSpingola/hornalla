@@ -36,8 +36,8 @@ La canasta la publica el INDEC junto con el IPC, a mediados de mes (el informe d
 
 Lo único que puede requerir tu intervención es el **token**:
 
-- `INDEC_API_TOKEN` es un JWT y **vence**. Cuando la actualización falla, GitHub abre un issue. Se genera uno nuevo en https://www.indec.gob.ar/apis y se actualiza en *Settings → Secrets and variables → Actions*.
-- Si Vercel no está conectado al repositorio, configurar `VERCEL_DEPLOY_HOOK` para que el despliegue salga igual.
+- `INDEC_API_TOKEN` es un JWT y **vence**. Cuando la actualización falla, GitHub abre un issue. Se genera uno nuevo en https://www.indec.gob.ar/apis y se actualiza en *Settings → Secrets and variables → Actions*. Ya está cargado en el repo (https://github.com/SantinoSpingola/hornalla) y probado el 25-nov-2026: el workflow trajo el período 202610.
+- Para que el despliegue salga solo después de cada actualización, crear un **Deploy Hook** en Vercel (Settings → Git → Deploy Hooks), subirlo al repo como `VERCEL_DEPLOY_HOOK` y listo. Si no, publicar con `npm run desplegar`.
 
 Para revisar el estado en cualquier momento: `npm run datos:estado` (con `-- --estricto` falla si falta el período esperado).
 
