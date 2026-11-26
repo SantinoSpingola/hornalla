@@ -82,6 +82,8 @@ body.sitio .btn-lg { padding: 16px 30px; }
 body.sitio .btn-ghost { background: transparent; border-color: color-mix(in srgb, currentColor 30%, transparent); }
 body.sitio .btn-ghost:hover { border-color: currentColor; }
 
+.hero-cta { display: flex; flex-wrap: wrap; gap: var(--s3); }
+
 /* Botón circular «cómo funciona» */
 .btn-circulo {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
@@ -191,7 +193,7 @@ body.sitio .btn-ghost:hover { border-color: currentColor; }
 @keyframes halo { from { opacity: .55; transform: translate(-50%, -50%) scale(.94); } to { opacity: 1; transform: translate(-50%, -50%) scale(1.06); } }
 @media (prefers-reduced-motion: reduce) { .fogata-halo, .fogata { animation: none; } }
 
-/* Piso de la portada: dato grande, lista numerada, llamada y botón redondo */
+/* Piso de la portada: el mensaje, la llamada y la nota chica */
 .hero-piso {
   position: relative; z-index: 3;
   display: grid; gap: var(--s6);
@@ -200,31 +202,34 @@ body.sitio .btn-ghost:hover { border-color: currentColor; }
   background: #f4f4ee;
   border-radius: var(--radio) var(--radio) 0 0;
 }
-.hero-fila { display: grid; gap: var(--s6); }
-@media (min-width: 900px) {
-  .hero-fila { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); align-items: start; }
+.hero-centro { display: grid; gap: var(--s4); justify-items: center; text-align: center; max-width: 860px; margin: 0 auto; }
+.hero-centro h1 {
+  font-size: clamp(2rem, 4.8vw, 3.6rem);
+  font-weight: 700; line-height: 1.04; letter-spacing: -.035em;
+  text-wrap: balance;
 }
+.hero-centro .hero-lead { max-width: 62ch; color: var(--ps-muted); font-size: 1.0625rem; line-height: 1.6; }
+.hero-centro .hero-lead strong { color: var(--ps-text); font-weight: 600; }
+.hero-centro .hero-cta { justify-content: center; align-items: center; }
+.hero-line { margin: var(--s2) 0 0; color: var(--ps-muted); font-size: .8125rem; }
 
-.hero-stat .v {
-  font-size: clamp(2.5rem, 6vw, 4.25rem); font-weight: 700; letter-spacing: -.045em; line-height: 1;
-  font-variant-numeric: tabular-nums lining-nums; color: var(--tinta);
+/* Resaltado del titular (se dibuja al cargar) */
+body.sitio .hero mark { position: relative; padding: 0 .18em; border-radius: .2em; }
+body.sitio .hero mark::before {
+  content: ""; position: absolute; inset: 0 -.02em;
+  background: var(--fuego); border-radius: .2em;
+  transform: scaleX(0); transform-origin: left center;
+  animation: marcador .7s var(--ease) .8s both;
 }
-.hero-stat .l { margin-top: var(--s3); max-width: 46ch; color: var(--ps-muted); font-size: 1rem; line-height: 1.55; }
-.hero-stat .l strong { color: var(--ps-text); font-weight: 600; }
+body.sitio .hero mark > span { position: relative; z-index: 1; color: var(--sobre-fuego); }
+@media (prefers-reduced-motion: reduce) { body.sitio .hero mark::before { animation: none; transform: scaleX(1); } }
 
-.hero-col { display: grid; gap: var(--s6); justify-items: start; }
-@media (min-width: 900px) { .hero-col { justify-items: end; text-align: right; } }
-.hero-col .hero-cta { margin-top: var(--s2); }
-
-.hero-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.hero-lista li { display: flex; align-items: baseline; gap: 10px; color: var(--ps-text); font-size: .9375rem; font-weight: 600; }
-@media (min-width: 900px) { .hero-lista li { flex-direction: row-reverse; } }
-.hero-lista em { font-style: normal; color: var(--fuego); font-weight: 600; font-variant-numeric: tabular-nums; }
-
-.hero-pie { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s5); }
-.hero-cta { display: flex; flex-wrap: wrap; gap: var(--s3); }
-.hero-nota { flex: 1 1 260px; margin: 0; max-width: 44ch; color: var(--ps-muted); font-size: .9375rem; line-height: 1.55; }
-.hero-nota strong { color: var(--ps-text); font-weight: 600; }
+/* Dato de contexto (segundo plano): precios al pie de la sección de ayuda */
+.dato-strip { max-width: 820px; background: #fbfbf8; border-radius: var(--radio); padding: var(--s5); margin-top: var(--s6); }
+.dato-strip p { margin: 0; color: var(--ps-muted); font-size: 1rem; line-height: 1.6; }
+.dato-strip p strong { color: var(--ps-text); }
+.dato-strip .v { font-size: 1.75rem; font-weight: 700; letter-spacing: -.03em; color: var(--tinta); font-variant-numeric: tabular-nums; margin-right: 6px; }
+.dato-strip .src { margin-top: 8px; font-size: .75rem; }
 
 /* ───────── Cinta ───────── */
 .cinta {

@@ -8,24 +8,42 @@ import CountUp from "../components/react-bits/CountUp/CountUp.jsx";
 import { ScrollVelocity } from "../components/react-bits/ScrollVelocity/ScrollVelocity.jsx";
 import { reducirMovimiento } from "../lib/util.js";
 
-/* ───────── cifras con datos oficiales ───────── */
+/* ───────── cifras con datos oficiales (segundo plano: se citan, no encabezan) ───────── */
 const LAST = D.periodos.length - 1;
 const CBA = D.cba[LAST];
 const SUBE = D.cbaVIA[LAST];
 const PERIODO = F.periodoLabel(D.ultimoPeriodo, true);
 const MESES = D.periodos.length;
-const HACE = D.cba[LAST - 12] || null;
 const ORGS = (window.ORGANIZACIONES_DATA || {}).organizaciones || [];
 const ORGS_VERIFICADAS = ORGS.filter((o) => o.verificada).length;
+
+/** Pesos que suben hasta su valor apenas entra en pantalla (React Bits · CountUp). */
+function Pesos({ valor, duracion = 1.1 }) {
+  if (reducirMovimiento()) return <>$&nbsp;{F.num(Math.round(valor), 0)}</>;
+  return <CountUp to={Math.round(valor)} separator="." prefix="$ " duration={duracion} />;
+}
+
+/** La fogata animada de la portada (web/public/fogata.webm, con transparencia). Centrada y flotando. */
+function Fogata() {
+  if (reducirMovimiento()) return <div className="fogata"><img className="fogata-video" src="/fogata-poster.png" alt="" aria-hidden="true" /></div>;
+  return (
+    <div className="fogata">
+      <div className="fogata-halo" aria-hidden="true" />
+      <video className="fogata-video" autoPlay loop muted playsInline preload="auto" poster="/fogata-poster.png" aria-hidden="true" disablePictureInPicture>
+        <source src="/fogata.webm" type="video/webm" />
+      </video>
+    </div>
+  );
+}
 
 /** La marca gigante entra letra por letra desde abajo de su máscara. */
 function Marca() {
   const letras = "Hornalla".split("");
   return (
-    <h1 className="wordmark" aria-label="Hornalla.">
-      {letras.map((ch, i) => <span key={i} className="wm-char" aria-hidden="true" style={{ "--i": i }}>{ch}</span>)}
-      <em aria-hidden="true"><span className="wm-char" style={{ "--i": letras.length }}>.</span></em>
-    </h1>
+    <div className="wordmark" aria-hidden="true">
+      {letras.map((ch, i) => <span key={i} className="wm-char" style={{ "--i": i }}>{ch}</span>)}
+      <em><span className="wm-char" style={{ "--i": letras.length }}>.</span></em>
+    </div>
   );
 }
 
@@ -50,25 +68,6 @@ function useHeroZoom() {
     };
   }, []);
   return ref;
-}
-
-/** Pesos que suben hasta su valor apenas carga la página (React Bits · CountUp). */
-function Pesos({ valor, duracion = 1.1 }) {
-  if (reducirMovimiento()) return <>$&nbsp;{F.num(Math.round(valor), 0)}</>;
-  return <CountUp to={Math.round(valor)} separator="." prefix="$ " duration={duracion} trigger="load" />;
-}
-
-/** La fogata animada de la portada (web/public/fogata.webm, con transparencia). Centrada y superpuesta a la marca. */
-function Fogata() {
-  if (reducirMovimiento()) return <div className="fogata"><img className="fogata-video" src="/fogata-poster.png" alt="" aria-hidden="true" /></div>;
-  return (
-    <div className="fogata">
-      <div className="fogata-halo" aria-hidden="true" />
-      <video className="fogata-video" autoPlay loop muted playsInline preload="auto" poster="/fogata-poster.png" aria-hidden="true" disablePictureInPicture>
-        <source src="/fogata.webm" type="video/webm" />
-      </video>
-    </div>
-  );
 }
 
 function Icono({ children }) {
@@ -123,6 +122,14 @@ const SERVICIOS = [
   },
 ];
 
+/** A quién ayuda y cómo, antes de hablar de datos. */
+const PARA_QUIEN = [
+  { n: "01", titulo: "Comedores", texto: "Calculan lo que cuesta dar de comer a su gente cada mes, con valores oficiales, y dejan de presupuestar a ojo." },
+  { n: "02", titulo: "Merenderos y ollas", texto: "Anotan lo que entra y lo que sale, controlan la despensa y arman el pedido para quien quiera donar." },
+  { n: "03", titulo: "Bancos de alimentos", texto: "Tienen números claros para coordinar y rendir cuentas con cantidades, no con planillas a mano." },
+  { n: "04", titulo: "Quien quiere ayudar", texto: "Ve, en alimentos y días de comida, qué logra su aporte y elige dónde ayudar con confianza." },
+];
+
 function BotonesAlta() {
   const copiar = useCopiar();
   return (
@@ -142,41 +149,29 @@ export default function Landing() {
         <SiteHeader />
 
         <main id="principal">
-          {/* ═════════ PORTADA ═════════ */}
+          {/* ═════════ PORTADA: qué es, a quién ayuda y cómo ═════════ */}
           <section className="hero" ref={refHero} aria-labelledby="h-hero">
             <div className="hero-contenido">
               <Marca />
-
               <div className="fogata-zona">
                 <Fogata />
               </div>
             </div>
 
             <div className="hero-piso">
-              <div className="hero-fila">
-                <Reveal className="hero-stat">
-                  <p className="v"><Pesos valor={CBA} /></p>
-                  <p className="l">
-                    Cuesta lo que hoy cuesta alimentar a <strong>un adulto por mes</strong> según la canasta básica
-                    alimentaria del INDEC ({PERIODO}, Gran Buenos Aires).
-                    {HACE ? <> Hace un año costaba <strong>$ {F.num(HACE, 0)}</strong>: subió <strong>{F.pct(SUBE)}</strong>.</> : null}
-                  </p>
-                </Reveal>
-                <Reveal className="hero-col" delay={1}>
-                  <ol className="hero-lista">
-                    <li><em>/01</em><span>Datos oficiales del INDEC</span></li>
-                    <li><em>/02</em><span>Gratis, sin registro ni publicidad</span></li>
-                    <li><em>/03</em><span>Cero datos personales</span></li>
-                  </ol>
-                  <div className="hero-cta">
-                    <a className="btn btn-acento btn-lg" href="herramienta.html">Usar la herramienta gratis</a>
-                    <a className="btn btn-ghost btn-lg" href="mapa.html">Ver el mapa</a>
-                  </div>
-                </Reveal>
-              </div>
-              <div className="hero-pie">
-                <p className="hero-nota">Pensada para <strong>comedores, merenderos y ollas populares</strong>: cargás cuánta gente come y la herramienta calcula, organiza y arma el pedido. Lo que cargás queda en tu dispositivo.</p>
-                <a className="btn-circulo" href="instructivo.html"><span aria-hidden="true">▶</span> Cómo funciona</a>
+              <div className="hero-centro">
+                <h1 id="h-hero">Herramientas gratuitas para <mark><span>quienes dan de comer.</span></mark></h1>
+                <p className="hero-lead">
+                  Hornalla ayuda a <strong>comedores, merenderos y ollas populares</strong> a saber cuánto cuesta alimentar
+                  a su gente, a organizar el mes y a mostrar qué logra cada aporte.
+                  Cargás a tu grupo y la herramienta hace las cuentas.
+                </p>
+                <div className="hero-cta">
+                  <a className="btn btn-acento btn-lg" href="herramienta.html">Usar la herramienta gratis</a>
+                  <a className="btn btn-ghost btn-lg" href="mapa.html">Ver el mapa</a>
+                  <a className="btn-circulo" href="instructivo.html"><span aria-hidden="true">▶</span> Cómo funciona</a>
+                </div>
+                <p className="hero-line">Gratis, sin registro, sin publicidad y sin datos personales. Los números salen de datos públicos del INDEC ({PERIODO}).</p>
               </div>
             </div>
           </section>
@@ -184,14 +179,55 @@ export default function Landing() {
           {/* Cinta */}
           <div className="cinta" aria-hidden="true">
             {reducirMovimiento()
-              ? <p className="cinta-quieta">Comedores · Merenderos · Ollas populares · Bancos de alimentos · Datos del INDEC · Gratis</p>
-              : <ScrollVelocity texts={["COMEDORES  ·  MERENDEROS  ·  OLLAS POPULARES  ·  BANCOS DE ALIMENTOS  ·  DATOS DEL INDEC  ·  GRATIS  ·  "]} velocity={45} numCopies={5} fontSize="0.9375rem" fontWeight={600} color="currentColor" />}
+              ? <p className="cinta-quieta">Comedores · Merenderos · Ollas populares · Bancos de alimentos · Gratis</p>
+              : <ScrollVelocity texts={["COMEDORES  ·  MERENDEROS  ·  OLLAS POPULARES  ·  BANCOS DE ALIMENTOS  ·  COMUNIDADES  ·  GRATIS  ·  "]} velocity={45} numCopies={5} fontSize="0.9375rem" fontWeight={600} color="currentColor" />}
           </div>
 
-          {/* ═════════ QUÉ HACEMOS ═════════ */}
+          {/* ═════════ A QUIÉN AYUDA Y CÓMO ═════════ */}
+          <section className="sec" id="para-quien" aria-labelledby="h-paraquien">
+            <div className="sec-in">
+              <Reveal className="panel-head"><p className="eyebrow">Para quién es</p><h2 id="h-paraquien">Para las que cocinan, y para quien quiere acercarse.</h2><p>Cada herramienta nació de una cuenta que alguien tenía que hacer a mano, todos los meses.</p></Reveal>
+              <div className="grid-ayuda">
+                {PARA_QUIEN.map((x, i) => (
+                  <Reveal className="ayuda" key={x.n} delay={i}>
+                    <span className="n">{x.n}</span>
+                    <h3>{x.titulo}</h3>
+                    <p>{x.texto}</p>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ═════════ QUIÉN SOY Y POR QUÉ ═════════ */}
+          <section className="sec alt" id="quienes" aria-labelledby="h-quienes">
+            <div className="sec-in">
+              <Reveal className="panel-head"><p className="eyebrow">Quién soy</p><h2 id="h-quienes">Un proyecto de una sola persona, hecho para ser útil.</h2></Reveal>
+              <div className="split">
+                <Reveal className="prose">
+                  <p className="big">Me llamo Santino Spingola y hago Hornalla por mi cuenta, de forma independiente y gratuita.</p>
+                  <p>Lo hice porque cada vez más gente come en comedores y merenderos, y quienes los sostienen suelen hacerlo con poco tiempo, recursos justos y planillas hechas a mano. Mientras los precios se mueven, las cuentas se hacen a mano, todos los meses, otra vez.</p>
+                  <p>Lo que más me llama de esto es simple: <strong>que las cuentas no le quiten tiempo a la comida</strong>. Quiero ayudar de la forma más concreta que sé, que es hacer herramientas que funcionen, se puedan comprobar y respeten a las personas.</p>
+                  <p>No soy un organismo del Estado ni estoy afiliado al INDEC: uso los datos abiertos que el INDEC publica en su API oficial y los traduzco en algo que sirva el lunes a la mañana. No cobro, no vendo publicidad ni pido datos personales. Y no soy quien da de comer: eso lo hacen cada día las organizaciones. Yo les ahorro cuentas.</p>
+                </Reveal>
+                <Reveal delay={1}>
+                  <p className="eyebrow" style={{ marginBottom: "var(--s3)" }}>Cómo trabajo</p>
+                  <ol className="principles">
+                    <li><div><h3>Las organizaciones, primero</h3><p>Ellas son quienes dan de comer. Hornalla es una herramienta a su servicio, no la protagonista.</p></div></li>
+                    <li><div><h3>Datos que se pueden comprobar</h3><p>Cada número sale de datos públicos y se puede verificar. Digo los límites antes de que alguien los marque.</p></div></li>
+                    <li><div><h3>Cero datos de las personas</h3><p>No pido ni guardo nombres de quienes comen ni de quienes donan. Sin fotos, y nunca de niñas y niños.</p></div></li>
+                    <li><div><h3>Gratis y sin letra chica</h3><p>Sin publicidad, sin registro, sin versión paga. Lo que cargás queda en tu dispositivo.</p></div></li>
+                    <li><div><h3>Neutral con todas</h3><p>Comedores de iglesias, de organizaciones sociales, de vecinos o de ONG: se ofrece igual a todas.</p></div></li>
+                  </ol>
+                </Reveal>
+              </div>
+            </div>
+          </section>
+
+          {/* ═════════ HERRAMIENTAS ═════════ */}
           <section className="panel-oscuro" id="que-hacemos" aria-labelledby="h-hacemos">
             <Reveal className="panel-head">
-              <p className="eyebrow">Qué hacemos</p>
+              <p className="eyebrow">Las herramientas</p>
               <h2>Cuatro herramientas <mark><span>gratis</span></mark> para el día a día.</h2>
               <p>Simples, pensadas para usarse desde el celular y sin instalar nada.</p>
             </Reveal>
@@ -202,58 +238,10 @@ export default function Landing() {
             </div>
           </section>
 
-          {/* ═════════ QUIÉNES SOMOS ═════════ */}
-          <section className="sec" id="quienes" aria-labelledby="h-quienes">
-            <div className="sec-in">
-              <Reveal className="panel-head"><p className="eyebrow">Quiénes somos</p><h2 id="h-quienes">Un proyecto independiente, hecho para ser útil.</h2></Reveal>
-              <div className="split">
-                <Reveal className="prose">
-                  <p className="big">Hornalla es un proyecto independiente y gratuito que pone datos públicos al servicio de las organizaciones que dan de comer en la Argentina.</p>
-                  <p>No somos un organismo del Estado ni estamos afiliados al INDEC: usamos los datos abiertos que el INDEC publica en su API oficial, los comprobamos contra sus propios resultados y los traducimos en algo que sirva el lunes a la mañana, cuando hay que decidir cuánta comida comprar.</p>
-                  <p>No cobramos, no vendemos publicidad ni pedimos datos personales. Y <strong>no somos quienes dan de comer</strong>: eso lo hacen cada día las organizaciones. Nosotros les ahorramos cuentas.</p>
-                </Reveal>
-                <Reveal delay={1}>
-                  <dl className="keyfacts">
-                    <div><dt>Qué somos</dt><dd>Un proyecto independiente y gratuito.</dd></div>
-                    <div><dt>Para quién</dt><dd>Comedores, merenderos, ollas populares, bancos de alimentos y quienes quieren ayudarlos.</dd></div>
-                    <div><dt>Datos</dt><dd>API oficial del INDEC: {MESES} meses de canasta básica alimentaria (Gran Buenos Aires) y precios promedio.</dd></div>
-                    <div><dt>Costo</dt><dd>$ 0. Sin registro ni publicidad.</dd></div>
-                    <div><dt>Estado</dt><dd>En desarrollo: la mejoramos con lo que nos cuentan las organizaciones.</dd></div>
-                  </dl>
-                </Reveal>
-              </div>
-            </div>
-          </section>
-
-          {/* ═════════ POR QUÉ ═════════ */}
-          <section className="sec alt" id="por-que" aria-labelledby="h-porque">
-            <div className="sec-in">
-              <div className="split">
-                <Reveal>
-                  <div className="panel-head" style={{ marginBottom: "var(--s5)" }}><p className="eyebrow">Por qué queremos ayudar</p><h2 id="h-porque">Las cuentas no deberían quitarle tiempo a la comida.</h2></div>
-                  <div className="prose">
-                    <p>Cada vez más gente se apoya en comedores y merenderos, y quienes los sostienen suelen hacerlo con poco tiempo, recursos justos y planillas hechas a mano. Mientras tanto, los precios se mueven: en el último año la canasta básica alimentaria subió <strong>{F.num(SUBE, 0)} %</strong>.</p>
-                    <p>El INDEC publica esos datos de forma abierta, pero casi nadie tiene tiempo de convertirlos en una cuenta útil. <strong>Eso es lo que hacemos</strong>: transformar un dato público en una herramienta simple que ahorre tiempo y ayude a pedir mejor.</p>
-                  </div>
-                </Reveal>
-                <Reveal delay={1}>
-                  <p className="eyebrow" style={{ marginBottom: "var(--s3)" }}>Cómo trabajamos</p>
-                  <ol className="principles">
-                    <li><div><h3>Las organizaciones, primero</h3><p>Ellas son quienes dan de comer. Hornalla es una herramienta a su servicio, no la protagonista.</p></div></li>
-                    <li><div><h3>Datos oficiales, no promesas</h3><p>Cada número sale del INDEC y se puede comprobar. Decimos los límites antes de que alguien los marque.</p></div></li>
-                    <li><div><h3>Cero datos de las personas</h3><p>No pedimos ni guardamos nombres de quienes comen ni de quienes donan. Sin fotos, y nunca de niñas y niños.</p></div></li>
-                    <li><div><h3>Gratis y sin letra chica</h3><p>Sin publicidad, sin registro, sin versión paga. Lo que cargás queda en tu dispositivo.</p></div></li>
-                    <li><div><h3>Neutral con todas</h3><p>Comedores de iglesias, de organizaciones sociales, de vecinos o de ONG: se ofrece igual a todas.</p></div></li>
-                  </ol>
-                </Reveal>
-              </div>
-            </div>
-          </section>
-
-          {/* ═════════ CÓMO ═════════ */}
+          {/* ═════════ CÓMO EMPIEZA ═════════ */}
           <section className="sec" id="como" aria-labelledby="h-como">
             <div className="sec-in">
-              <Reveal className="panel-head"><p className="eyebrow">Cómo ayudamos</p><h2 id="h-como">De cargar a tu grupo a pedir ayuda, en cuatro pasos.</h2></Reveal>
+              <Reveal className="panel-head"><p className="eyebrow">Cómo empieza</p><h2 id="h-como">De cargar a tu grupo a pedir ayuda, en cuatro pasos.</h2></Reveal>
               <Reveal>
                 <ol className="steps-h">
                   <li><h3>Cargá a tu grupo</h3><p>Cuántas personas comen, por edad. No hace falta anotar nombres.</p></li>
@@ -327,6 +315,12 @@ export default function Landing() {
                 <article className="ayuda"><span className="n">02</span><h3>Comprobá el titular</h3><p>Antes de confirmar una transferencia, tu banco te muestra el titular de la cuenta. Tiene que coincidir con el que figura en Hornalla.</p></article>
                 <article className="ayuda"><span className="n">03</span><h3>Ayudá también sin dinero</h3><p>Alimentos, tiempo como voluntaria o voluntario, ropa o útiles: cada organización cuenta qué necesita hoy.</p></article>
               </Reveal>
+              <Reveal>
+                <aside className="dato-strip" aria-label="Contexto de precios">
+                  <p><span className="v"><Pesos valor={CBA} /></span> cuesta hoy alimentar a un adulto por mes, según la canasta básica alimentaria del INDEC ({PERIODO}): <strong>{F.num(SUBE, 0)} %</strong> más que hace un año. Por eso cada aporte, chico o grande, se siente.</p>
+                  <p className="src">Fuente: INDEC, API de datos abiertos. Gran Buenos Aires.</p>
+                </aside>
+              </Reveal>
               <Reveal><p className="callout warn" style={{ marginTop: "var(--s5)", maxWidth: 820 }}><strong>Si algo no te cierra, no transfieras.</strong> Hornalla no recibe, procesa ni garantiza donaciones, y una verificación humana no es una garantía absoluta.</p></Reveal>
             </div>
           </section>
@@ -337,9 +331,9 @@ export default function Landing() {
               <Reveal className="panel-head"><p className="eyebrow">Preguntas frecuentes</p><h2 id="h-faq">Lo que más nos preguntan.</h2></Reveal>
               <Reveal className="faq">
                 <details><summary>¿Cuesta algo usar Hornalla?</summary><p>No. Es gratis, sin registro y sin publicidad.</p></details>
-                <details><summary>¿Qué pasa con los datos que cargo?</summary><p>Quedan solo en tu navegador, en tu dispositivo. No tenemos servidor ni base de datos con tus datos. Por eso conviene descargar una <strong>copia de seguridad</strong> desde la sección Compartir de la herramienta.</p></details>
+                <details><summary>¿Qué pasa con los datos que cargo?</summary><p>Quedan solo en tu navegador, en tu dispositivo. No hay servidor ni base de datos con tus datos. Por eso conviene descargar una <strong>copia de seguridad</strong> desde la sección Compartir de la herramienta.</p></details>
                 <details><summary>¿Hornalla recibe donaciones?</summary><p>No. Hornalla <strong>no recibe, procesa ni verifica donaciones</strong>: las transferencias van directo de quien dona a la cuenta de la organización.</p></details>
-                <details><summary>¿Es un servicio oficial?</summary><p>No. Es un proyecto independiente: no es del INDEC ni de ningún organismo. Usa los datos abiertos que el INDEC publica en su API, y los resultados coinciden con los de los hogares tipo que ese organismo difunde.</p></details>
+                <details><summary>¿Es un servicio oficial?</summary><p>No. Es un proyecto independiente de una persona: no es del INDEC ni de ningún organismo. Usa los datos abiertos que el INDEC publica en su API, y los resultados coinciden con los de los hogares tipo que ese organismo difunde.</p></details>
                 <details><summary>¿De dónde salen los números?</summary><p>De la canasta básica alimentaria del INDEC para el Gran Buenos Aires, la tabla oficial de adultos equivalentes y los precios promedio de la API del INDEC. Se actualizan con cada nuevo índice mensual.</p></details>
                 <details><summary>¿Sirve para mi provincia?</summary><p>Sí, con una aclaración: el valor oficial de canasta disponible es el del Gran Buenos Aires, así que en otras regiones el costo es una referencia. Comprar al por mayor o recibir donaciones en especie también lo cambia.</p></details>
                 <details><summary>¿Cómo sumo mi organización al mapa?</summary><p>Escribinos con el botón «Sumá tu organización». Hablamos con vos, acordamos qué datos mostrar y registramos tu consentimiento por escrito. Podés pedir cambios o la baja cuando quieras.</p></details>
@@ -352,7 +346,7 @@ export default function Landing() {
             <div className="cierre-in">
               <div>
                 <h2 id="h-cta">Probá la herramienta. Son cinco minutos.</h2>
-                <p>Cargá a tu grupo y mirá cuánto cuesta alimentarlo este mes, con datos oficiales.</p>
+                <p>Cargá a tu grupo y mirá cuánto cuesta alimentarlo este mes.</p>
               </div>
               <div className="hero-cta"><a className="btn btn-tinta btn-lg" href="herramienta.html">Usar la herramienta gratis</a><a className="btn btn-ghost btn-lg" href="mapa.html">Ver el mapa</a></div>
             </div>

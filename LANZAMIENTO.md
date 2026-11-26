@@ -10,7 +10,7 @@ Estado al 13-nov-2026: herramienta terminada y probada, kit del piloto en `pilot
 |---|---|
 | **Nombre** | Búsqueda de antecedentes en el INPI, registrar el dominio y reservar usuarios. Detalle en [MARCA.md](MARCA.md). |
 | **Contacto** | Completar `web/config.js` con tu mail y/o WhatsApp. Sin eso, nadie puede devolverte comentarios desde el sitio, y en el inicio y en el mapa no aparece el botón «Sumá tu organización» (queda solo «Copiar mensaje de alta»). |
-| **Textos del inicio** | Leer `web/src/pages/Landing.jsx` (quiénes somos, por qué, preguntas) y ajustarlo a tu voz. Si querés mostrar tu nombre, una foto o la historia detrás del proyecto, es el lugar; está escrito en tercera persona a propósito para no inventar nada. |
+| **Textos del inicio** | Leer `web/src/pages/Landing.jsx` y ajustarlo a tu voz. La sección «Quién soy» está escrita en primera persona con datos verificables: **sumale tu historia** (por qué nació Hornalla, qué te llama a hacerlo) con tus palabras. |
 | **Dominio** | `hornalla.com.ar` o `hornalla.ar` (confirmar en nic.ar). Sin dominio propio sirve un subdominio gratuito para el piloto. |
 | **Términos del INDEC** | Los [términos](https://api.indec.gob.ar/ayuda/terminos) hablan de política de datos abiertos pero no detallan límites ni redistribución. Escribirles para avisar y preguntar es buena práctica. |
 | **Imagen de vista previa** | Falta `web/og.png` (1200×630) para que se vea bien al compartir el enlace. |
