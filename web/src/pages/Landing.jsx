@@ -124,9 +124,9 @@ const SERVICIOS = [
 
 /** A quién ayuda y cómo, antes de hablar de datos. */
 const PARA_QUIEN = [
-  { n: "01", titulo: "Comedores", texto: "Calculan lo que cuesta dar de comer a su gente cada mes, con valores oficiales, y dejan de presupuestar a ojo." },
-  { n: "02", titulo: "Merenderos y ollas", texto: "Anotan lo que entra y lo que sale, controlan la despensa y arman el pedido para quien quiera donar." },
-  { n: "03", titulo: "Bancos de alimentos", texto: "Tienen números claros para coordinar y rendir cuentas con cantidades, no con planillas a mano." },
+  { n: "01", titulo: "Comedores", texto: "El costo del mes sale en segundos, con valores oficiales. El tiempo que no va en planillas, va en la gente que come." },
+  { n: "02", titulo: "Merenderos y ollas", texto: "Presupuesto, despensa y el pedido para WhatsApp quedan listos sin repetir cuentas ni revisar planillas cada semana." },
+  { n: "03", titulo: "Bancos de alimentos", texto: "Números claros para coordinar y rendir cuentas, sin pasar horas con tareas que se repiten todos los meses." },
   { n: "04", titulo: "Quien quiere ayudar", texto: "Ve, en alimentos y días de comida, qué logra su aporte y elige dónde ayudar con confianza." },
 ];
 
@@ -160,11 +160,10 @@ export default function Landing() {
 
             <div className="hero-piso">
               <div className="hero-centro">
-                <h1 id="h-hero">Herramientas gratuitas para <mark><span>quienes dan de comer.</span></mark></h1>
+                <h1 id="h-hero">La tecnología y la IA, al servicio de <mark><span>quienes dan de comer.</span></mark></h1>
                 <p className="hero-lead">
-                  Hornalla ayuda a <strong>comedores, merenderos y ollas populares</strong> a saber cuánto cuesta alimentar
-                  a su gente, a organizar el mes y a mostrar qué logra cada aporte.
-                  Cargás a tu grupo y la herramienta hace las cuentas.
+                  Hornalla ayuda a <strong>comedores, merenderos y ollas populares</strong> a hacer en segundos las cuentas,
+                  los pedidos y las páginas que hoy se escriben a mano, para que ese tiempo vaya a la gente.
                 </p>
                 <div className="hero-cta">
                   <a className="btn btn-acento btn-lg" href="herramienta.html">Usar la herramienta gratis</a>
@@ -186,7 +185,7 @@ export default function Landing() {
           {/* ═════════ A QUIÉN AYUDA Y CÓMO ═════════ */}
           <section className="sec" id="para-quien" aria-labelledby="h-paraquien">
             <div className="sec-in">
-              <Reveal className="panel-head"><p className="eyebrow">Para quién es</p><h2 id="h-paraquien">Para las que cocinan, y para quien quiere acercarse.</h2><p>Cada herramienta nació de una cuenta que alguien tenía que hacer a mano, todos los meses.</p></Reveal>
+              <Reveal className="panel-head"><p className="eyebrow">Para quién es</p><h2 id="h-paraquien">Para que el tiempo vaya a la gente.</h2><p>Cada tarea repetitiva que la herramienta se lleva, es una persona más servida o una hora más de descanso.</p></Reveal>
               <div className="grid-ayuda">
                 {PARA_QUIEN.map((x, i) => (
                   <Reveal className="ayuda" key={x.n} delay={i}>
@@ -206,9 +205,9 @@ export default function Landing() {
               <div className="split">
                 <Reveal className="prose">
                   <p className="big">Me llamo Santino Spingola y hago Hornalla por mi cuenta, de forma independiente y gratuita.</p>
-                  <p>Lo hice porque cada vez más gente come en comedores y merenderos, y quienes los sostienen suelen hacerlo con poco tiempo, recursos justos y planillas hechas a mano. Mientras los precios se mueven, las cuentas se hacen a mano, todos los meses, otra vez.</p>
-                  <p>Lo que más me llama de esto es simple: <strong>que las cuentas no le quiten tiempo a la comida</strong>. Quiero ayudar de la forma más concreta que sé, que es hacer herramientas que funcionen, se puedan comprobar y respeten a las personas.</p>
-                  <p>No soy un organismo del Estado ni estoy afiliado al INDEC: uso los datos abiertos que el INDEC publica en su API oficial y los traduzco en algo que sirva el lunes a la mañana. No cobro, no vendo publicidad ni pido datos personales. Y no soy quien da de comer: eso lo hacen cada día las organizaciones. Yo les ahorro cuentas.</p>
+                  <p>Creo que la tecnología y la IA no tienen que quedar solo para las empresas grandes. Pueden estar al servicio de quien menos tiene: que un comedor tenga, gratis, lo que antes era tiempo perdido en tareas repetitivas, y pueda usar ese tiempo en la gente.</p>
+                  <p>Eso es lo que más me llama de esto: <strong>que las cuentas no le quiten tiempo a la comida</strong>. Quiero ayudar de la forma más concreta que sé, que es hacer herramientas que funcionen, se puedan comprobar y respeten a las personas.</p>
+                  <p>No soy un organismo del Estado ni estoy afiliado al INDEC: uso los datos abiertos que el INDEC publica en su API oficial y los traduzco en algo que sirva el lunes a la mañana. No cobro, no vendo publicidad ni pido datos personales. Y no soy quien da de comer: eso lo hacen cada día las organizaciones. Yo les ahorro cuentas. Cuando toca pedir ayuda, la IA escribe el borrador; la revisa y la firma quien cocina.</p>
                 </Reveal>
                 <Reveal delay={1}>
                   <p className="eyebrow" style={{ marginBottom: "var(--s3)" }}>Cómo trabajo</p>
@@ -228,8 +227,8 @@ export default function Landing() {
           <section className="panel-oscuro" id="que-hacemos" aria-labelledby="h-hacemos">
             <Reveal className="panel-head">
               <p className="eyebrow">Las herramientas</p>
-              <h2>Cuatro herramientas <mark><span>gratis</span></mark> para el día a día.</h2>
-              <p>Simples, pensadas para usarse desde el celular y sin instalar nada.</p>
+              <h2>Lo repetitivo, <mark><span>resuelto por la tecnología.</span></mark></h2>
+              <p>Simple, desde el celular y sin instalar nada. Y cuando toque pedir ayuda, la IA te escribe el borrador: nada sale sin tu revisión y nada viaja a ningún servidor.</p>
             </Reveal>
             <div className="panel-in">
               <div className="grid-srv">
@@ -246,7 +245,7 @@ export default function Landing() {
                 <ol className="steps-h">
                   <li><h3>Cargá a tu grupo</h3><p>Cuántas personas comen, por edad. No hace falta anotar nombres.</p></li>
                   <li><h3>Mirá cuánto cuesta</h3><p>Con la canasta oficial del INDEC, para todo el mes y por ración.</p></li>
-                  <li><h3>Organizá y pedí mejor</h3><p>Presupuesto, despensa y un pedido listo para enviar.</p></li>
+                  <li><h3>Organizá y pedí mejor</h3><p>Presupuesto, despensa y el borrador de tu pedido: escrito con IA, revisado por vos.</p></li>
                   <li><h3>Compartí tu página</h3><p>Enlace y QR para quienes quieran ayudar y, si querés, tu lugar en el mapa.</p></li>
                 </ol>
               </Reveal>
@@ -331,6 +330,7 @@ export default function Landing() {
               <Reveal className="panel-head"><p className="eyebrow">Preguntas frecuentes</p><h2 id="h-faq">Lo que más nos preguntan.</h2></Reveal>
               <Reveal className="faq">
                 <details><summary>¿Cuesta algo usar Hornalla?</summary><p>No. Es gratis, sin registro y sin publicidad.</p></details>
+                <details><summary>¿Hornalla usa IA?</summary><p>Sí, como ayudante para escribir: cuando armás tu página, puede redactar el pedido para vecinos, empresas o proveedores a partir de tus números reales. El texto se arma en tu dispositivo para copiar y pegar en la IA que uses: <strong>Hornalla no envía nada a ningún servidor</strong> y el borrador siempre lo revisa una persona antes de publicarse.</p></details>
                 <details><summary>¿Qué pasa con los datos que cargo?</summary><p>Quedan solo en tu navegador, en tu dispositivo. No hay servidor ni base de datos con tus datos. Por eso conviene descargar una <strong>copia de seguridad</strong> desde la sección Compartir de la herramienta.</p></details>
                 <details><summary>¿Hornalla recibe donaciones?</summary><p>No. Hornalla <strong>no recibe, procesa ni verifica donaciones</strong>: las transferencias van directo de quien dona a la cuenta de la organización.</p></details>
                 <details><summary>¿Es un servicio oficial?</summary><p>No. Es un proyecto independiente de una persona: no es del INDEC ni de ningún organismo. Usa los datos abiertos que el INDEC publica en su API, y los resultados coinciden con los de los hogares tipo que ese organismo difunde.</p></details>
