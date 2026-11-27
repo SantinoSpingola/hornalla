@@ -146,41 +146,111 @@ describe("Org: raciones", () => {
   });
 });
 
-describe("Org: despensa y pedido", () => {
-  const ae = C.totales({ a30v: 10 }).ae;
-  const lista = C.lista(ae, 30, 100);
-  it("lo necesario sale de la canasta oficial: 10 varones adultos → 67,5 kg de pan", () => {
-    const f = Org.faltantes(lista, {});
-    const pan = f.find((x: any) => x.id === "pan");
-    expect(pan.necesario).toBeCloseTo(67500, 6);
-    expect(pan.falta).toBeCloseTo(67500, 6);
-    expect(pan.cobertura).toBe(0);
+describe("Org: inventario, comidas y lista de compras", () => {
+  it("migración v1 → v2: el stock viejo pasa a inventario y las bebidas alcohólicas no", () => {
+    const e = Store.sanear({ stock: { papa: 5000, leche: 9000, beb_alc: 1080 } });
+    expect(e.v).toBe(2);
+    const papa = e.inventario.find((i: any) => i.nombre === "Papa");
+    expect(papa).toBeTruthy();
+    expect(papa.cantidad).toBe(5);
+    expect(papa.unidad).toBe("kg");
+    const leche = e.inventario.find((i: any) => i.nombre === "Leche");
+    expect(leche.unidad).toBe("kg"); // la canasta la expresa en gramos
+    expect(e.inventario.some((i: any) => /alc/i.test(i.nombre))).toBe(false);
+    expect(e.inventario).toHaveLength(2);
   });
-  it("descuenta el stock y limita a 0 y 100 %", () => {
-    const f = Org.faltantes(lista, { pan: 17500, papa: 999999 });
-    expect(f.find((x: any) => x.id === "pan").falta).toBeCloseTo(50000, 6);
-    expect(f.find((x: any) => x.id === "pan").cobertura).toBeCloseTo((17500 / 67500) * 100, 6);
-    const papa = f.find((x: any) => x.id === "papa");
-    expect(papa.falta).toBe(0);
-    expect(papa.cobertura).toBe(100);
+  it("un estado v2 no se re-migra ni pierde su inventario", () => {
+    const antes = { inventario: [{ id: "a1", nombre: "Arroz", cantidad: 3, unidad: "kg", vence: "" }], stock: { papa: 5000 } };
+    const e = Store.sanear(antes);
+    expect(e.inventario).toHaveLength(1);
+    expect(e.inventario[0].nombre).toBe("Arroz");
   });
-  it("unidad visible: kg/litros desde 1000, g/cc por debajo", () => {
-    expect(Org.aUnidadVisible(67500, "g")).toMatchObject({ cantidad: 67.5, unidad: "kg", factor: 1000 });
-    expect(Org.aUnidadVisible(300, "g")).toMatchObject({ cantidad: 300, unidad: "g", factor: 1 });
-    expect(Org.aUnidadVisible(10800, "cc").unidad).toBe("litros");
-    expect(Org.txtCantidad(67500, "g")).toBe("67,5 kg");
+
+  it("ingresoInventario suma a lo existente aunque la unidad sea g o kg", () => {
+    let inv: any[] = [{ id: "a1", nombre: "Arroz", cantidad: 2, unidad: "kg", vence: "" }];
+    inv = Org.ingresoInventario(inv, { nombre: "arroz", cantidad: 500, unidad: "g" });
+    expect(inv).toHaveLength(1);
+    expect(inv[0].cantidad).toBe(2.5);
+    inv = Org.ingresoInventario(inv, { nombre: "Fideos", cantidad: 3, unidad: "kg" });
+    expect(inv).toHaveLength(2);
   });
-  it("el pedido lista lo más urgente primero y respeta el máximo", () => {
-    const f = Org.faltantes(lista, { pan: 60000 });
-    const t = Org.pedidoTexto("Merendero X", f, { max: 3 });
-    expect(t).toContain("*Merendero X* necesita para este mes:");
-    expect(t.split("\n").filter((l: string) => l.startsWith("•"))).toHaveLength(3);
-    expect(t).not.toContain("• Pan:"); // el pan está casi cubierto: no es lo más urgente
-    expect(t).toContain("alimentos más");
+  it("consumirInventario descuenta, no baja de cero y elimina lo que queda en cero", () => {
+    let inv: any[] = [{ id: "a1", nombre: "Arroz", cantidad: 2, unidad: "kg", vence: "" }];
+    inv = Org.consumirInventario(inv, { nombre: "Arroz", cantidad: 1500, unidad: "g" });
+    expect(inv[0].cantidad).toBe(0.5);
+    inv = Org.consumirInventario(inv, { nombre: "Arroz", cantidad: 900, unidad: "g" });
+    expect(inv).toHaveLength(0); // quedó en 0: se quita
+    expect(Org.consumirInventario([], { nombre: "X", cantidad: 1, unidad: "kg" })).toHaveLength(0);
   });
-  it("si no falta nada, el pedido queda vacío", () => {
-    const todo = Object.fromEntries(lista.map((x: any) => [x.id, x.base]));
-    expect(Org.pedidoTexto("X", Org.faltantes(lista, todo))).toBe("");
+
+  it("las necesidades escalan la receta a las personas cocinadas y suman por ingrediente", () => {
+    const recetas = [
+      { id: "r1", nombre: "Guiso", personas: 4, ingredientes: [
+        { nombre: "Fideos", cantidad: 0.5, unidad: "kg" },
+        { nombre: "Cebolla", cantidad: 300, unidad: "g" },
+      ] },
+      { id: "r2", nombre: "Sopa", personas: 10, ingredientes: [{ nombre: "Cebolla", cantidad: 0.2, unidad: "kg" }] },
+    ];
+    const comidas = [
+      { id: "c1", fecha: "2026-11-03", recetaId: "r1", personas: 8 },   // factor 2 → 1 kg fideos, 600 g cebolla
+      { id: "c2", fecha: "2026-11-10", recetaId: "r2", personas: 50 }, // factor 5 → 1 kg cebolla
+      { id: "c3", fecha: "2026-12-01", recetaId: "r1", personas: 4 },  // otro mes: no cuenta
+    ];
+    const n = Org.necesidadesDeComidas(recetas, comidas, "2026-11");
+    expect(n.find((x: any) => x.nombre === "Fideos")).toMatchObject({ cantidad: 1, unidad: "kg" });
+    const cebolla = n.find((x: any) => x.nombre === "Cebolla");
+    expect(cebolla.cantidad).toBeCloseTo(1.6, 6); // 600 g + 1 kg agregados en kg
+    expect(Org.necesidadesDeComidas(recetas, comidas, "2026-12")).toHaveLength(2); // guiso para 4: fideos 0,5 kg + cebolla 300 g
+  });
+
+  it("la lista de compras resta el inventario (con donaciones anotadas) por medida compatible", () => {
+    const necesidades = [
+      { nombre: "Fideos", unidad: "kg", cantidad: 10 },
+      { nombre: "Cebolla", unidad: "kg", cantidad: 2 },
+    ];
+    const inventario = [
+      { id: "i1", nombre: "fideos", cantidad: 2500, unidad: "g", vence: "" }, // 2,5 kg
+      { id: "i2", nombre: "Cebolla", cantidad: 3, unidad: "kg", vence: "" },
+    ];
+    const c = Org.comprasPendientes(necesidades, inventario);
+    expect(c.find((x: any) => x.nombre === "Fideos")).toMatchObject({ necesario: 10, hay: 2.5, falta: 7.5 });
+    expect(c.find((x: any) => x.nombre === "Cebolla").falta).toBe(0); // la donación cubre todo
+  });
+
+  it("el pedido de compras lista lo que falta, del más urgente primero", () => {
+    const pend = [
+      { nombre: "Fideos", unidad: "kg", necesario: 10, hay: 2.5, falta: 7.5 },
+      { nombre: "Cebolla", unidad: "kg", necesario: 2, hay: 3, falta: 0 },
+      { nombre: "Aceite", unidad: "litros", necesario: 3, hay: 0, falta: 3 },
+    ];
+    const t = Org.pedidoComprasTexto("Merendero X", pend, { max: 2 });
+    expect(t).toContain("*Merendero X* necesita comprar:");
+    expect(t.split("\n").filter((l: string) => l.startsWith("•"))).toHaveLength(2);
+    expect(t.indexOf("Fideos")).toBeLessThan(t.indexOf("Aceite")); // mayor faltante primero
+    expect(t).not.toContain("Cebolla");
+    expect(t).not.toContain("alimentos más"); // con 2 faltantes y máximo 2, no se corta nada
+    expect(Org.pedidoComprasTexto("X", pend.filter((p: any) => p.falta === 0))).toBe("");
+  });
+
+  it("costos: gasto monetario y costo económico estimado (con donaciones anotadas con valor)", () => {
+    const estado = Store.sanear({
+      gastos: [{ fecha: "2026-11-05", monto: 50000, rubro: "alimentos" }],
+      raciones: { "2026-11-02": 40, "2026-11-03": 60 },
+      movimientos: [
+        { fecha: "2026-11-04", tipo: "donacion", itemNombre: "Verduras", cantidad: 20, unidad: "kg", valor: 30000 },
+        { fecha: "2026-11-05", tipo: "compra", itemNombre: "Fideos", cantidad: 10, unidad: "kg", valor: null },
+      ],
+    });
+    const rc = Org.resumenCostos(estado, "2026-11");
+    expect(rc.gastoAlimentos).toBe(50000);
+    expect(rc.valorDonaciones).toBe(30000);
+    expect(rc.costoEstimadoTotal).toBe(80000);
+    expect(rc.gastoPorRacion).toBe(500);
+    expect(rc.costoEconomicoPorRacion).toBe(800);
+    const sinDatos = Org.resumenCostos(Store.sanear({}), "2026-11");
+    expect(sinDatos.gastoPorRacion).toBeNull();
+    expect(sinDatos.costoEconomicoPorRacion).toBeNull();
+    expect(sinDatos.valorDonaciones).toBe(0);
   });
 });
 
@@ -192,7 +262,7 @@ describe("Org: exportación CSV", () => {
   });
   it("incluye ingresos, gastos y raciones y escapa ; y comillas", () => {
     const lineas = Org.aCSV(estado, "2026-11").split("\n");
-    expect(lineas[0]).toBe("tipo;fecha;monto_ars;rubro_u_origen;detalle");
+    expect(lineas[0]).toBe("tipo;fecha;monto_o_valor;rubro_u_origen;detalle");
     expect(lineas[1]).toBe('ingreso;2026-11-02;1000;"Vecinos; ""los de la esquina""";');
     expect(lineas[2]).toBe("gasto;2026-11-03;500;Gas y combustible;garrafa");
     expect(lineas[3]).toBe("raciones;2026-11-04;;;42");
@@ -200,6 +270,17 @@ describe("Org: exportación CSV", () => {
   it("filtra por mes", () => {
     expect(Org.aCSV(estado, "2026-12").split("\n")).toHaveLength(1);
     expect(Org.aCSV(estado, null).split("\n")).toHaveLength(4);
+  });
+  it("incluye los movimientos de despensa con su valor cuando lo tienen", () => {
+    const conMovs = Store.sanear({
+      movimientos: [
+        { fecha: "2026-11-04", tipo: "donacion", itemNombre: "Verduras", cantidad: 20, unidad: "kg", valor: 30000, detalle: "verdulería" },
+        { fecha: "2026-11-05", tipo: "consumo", itemNombre: "Fideos", cantidad: 4, unidad: "kg", valor: null },
+      ],
+    });
+    const lineas = Org.aCSV(conMovs, "2026-11").split("\n");
+    expect(lineas[1]).toBe("despensa: donación;2026-11-04;30000;Verduras · 20 kg;verdulería");
+    expect(lineas[2]).toBe("despensa: consumo;2026-11-05;;Fideos · 4 kg;");
   });
 });
 

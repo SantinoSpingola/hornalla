@@ -10,7 +10,7 @@ import "../../micro.js"; // microanimación de las cifras que cambian (ver micro
 const LAST = D.periodos.length - 1;
 const CBA = D.cba[LAST];
 const EDICION = F.periodoLabel(D.ultimoPeriodo, true);
-const TABS = ["calcular", "presupuesto", "despensa", "raciones", "compartir"];
+const TABS = ["calcular", "presupuesto", "despensa", "comidas", "raciones", "compartir"];
 const EQ = {};
 C.equivalencias.forEach((e) => { EQ[e.id] = e; });
 const GRUPOS = [
@@ -22,10 +22,11 @@ const ICONOS = {
   calcular: <><rect x="5" y="2.5" width="14" height="19" /><path d="M8.5 7h7M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01" /></>,
   presupuesto: <path d="M3 7h17v13H3zM3 7V4h14v3M15.5 13.5h2.5" />,
   despensa: <path d="M3 7.5l9-5 9 5v9l-9 5-9-5zM3 7.5l9 5 9-5M12 12.5v9" />,
+  comidas: <><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2zM8 8h7M8 12h7M8 16h4" /><path d="M14 4v4h4" /></>,
   raciones: <path d="M6 3v8a2 2 0 0 0 2 2v8M10 3v8M8 3v8M18 3c-2.2 1.2-3 4-3 8h3v10" />,
   compartir: <><circle cx="6" cy="12" r="2.5" /><circle cx="18" cy="5.5" r="2.5" /><circle cx="18" cy="18.5" r="2.5" /><path d="M8.2 10.8l7.6-4M8.2 13.2l7.6 4" /></>,
 };
-const ETIQUETAS = { calcular: "Calcular", presupuesto: "Presupuesto", despensa: "Despensa", raciones: "Raciones", compartir: "Compartir" };
+const ETIQUETAS = { calcular: "Calcular", presupuesto: "Presupuesto", despensa: "Despensa", comidas: "Comidas", raciones: "Raciones", compartir: "Compartir" };
 
 /* ───────── cálculo ───────── */
 function calcular(e) {
@@ -339,99 +340,405 @@ function Presupuesto({ c, mes, setMes, irA }) {
   );
 }
 
-/* ───────── DESPENSA ───────── */
-const fmtDec = (n) => { const r = Math.round(n * 100) / 100; return r === 0 ? "" : F.num(r, Number.isInteger(r) ? 0 : 2); };
+/* ───────── DESPENSA (inventario real) ───────── */
+const UNIDADES = S.UNIDADES || ["g", "kg", "cc", "litros", "unidad", "docena"];
 
-function FilaDespensa({ it }) {
-  const vis = O.aUnidadVisible(it.necesario, it.baseUnidad);
-  const [txt, setTxt] = useState(() => fmtDec(it.tiene / vis.factor));
-  const cambiar = (v) => {
-    setTxt(v);
-    const n = Number(String(v).replace(/\./g, "").replace(",", "."));
-    const base = isFinite(n) && n > 0 ? Math.min(n * vis.factor, 1e9) : 0;
-    store.actualizar((e) => { if (base > 0) e.stock[it.id] = base; else delete e.stock[it.id]; });
+/** Formulario rápido para anotar una compra, una donación o un consumo. */
+function FormMovimiento({ mes, setMes }) {
+  const toast = useToast();
+  const [fecha, setFecha] = useState(O.hoyISO());
+  const [tipo, setTipo] = useState("donacion");
+  const [nombre, setNombre] = useState("");
+  const [cant, setCant] = useState("");
+  const [unidad, setUnidad] = useState("kg");
+  const [valor, setValor] = useState("");
+  const [detalle, setDetalle] = useState("");
+  const esDonacion = tipo === "donacion";
+
+  const guardar = () => {
+    const q = Number(String(cant).replace(/\./g, "").replace(",", "."));
+    if (!S.fechaOk(fecha)) return toast("Poné una fecha válida.");
+    const nom = nombre.trim();
+    if (!nom) return toast("¿Qué alimento es?");
+    if (!isFinite(q) || q <= 0) return toast("Poné cuánto entró (o cuánto se usó).");
+    let v = null;
+    if (esDonacion && valor) {
+      v = Number(String(valor).replace(/\./g, "").replace(",", "."));
+      if (!isFinite(v) || v <= 0) return toast("El valor estimado tiene que ser un número (o dejalo vacío).");
+      v = Math.round(v * 100) / 100;
+    }
+    store.actualizar((s) => {
+      if (tipo === "consumo") {
+        s.inventario = O.consumirInventario(s.inventario, { nombre: nom, cantidad: q, unidad });
+      } else {
+        s.inventario = O.ingresoInventario(s.inventario, { nombre: nom, cantidad: q, unidad, vence: "" });
+      }
+      s.movimientos.push({ id: S.nuevoId(), fecha, tipo, itemNombre: nom, cantidad: q, unidad, valor: v, detalle: detalle.trim() });
+      if (s.movimientos.length > S.MAX_ITEMS) s.movimientos.splice(0, s.movimientos.length - S.MAX_ITEMS);
+    });
+    setMes(O.mesDe(fecha));
+    setNombre(""); setCant(""); setValor(""); setDetalle("");
+    toast(esDonacion ? "Donación registrada." : tipo === "compra" ? "Compra registrada." : "Consumo registrado.");
   };
+
   return (
-    <tr id={"d-" + it.id}>
-      <td>{it.etq}{it.incluye && <small>{it.incluye}</small>}</td>
-      <td className="r">{O.txtCantidad(it.necesario, it.baseUnidad)}</td>
-      <td className="r">
-        <input className="input" type="text" inputMode="decimal" autoComplete="off" placeholder="0" aria-label={"Cantidad que tenemos de " + it.etq + " (" + vis.unidad + ")"} value={txt} onFocus={(ev) => ev.target.select()} onChange={(ev) => cambiar(ev.target.value)} /> {vis.unidad}
-      </td>
-      <td className="r falta">{it.falta > 0 ? O.txtCantidad(it.falta, it.baseUnidad) : "—"}</td>
-      <td><div className="cov"><div className="bar"><i style={{ width: it.cobertura + "%" }} /></div><span className="pc">{F.num(it.cobertura, 0)}%</span></div></td>
-    </tr>
+    <div className="card">
+      <h2>Anotar un movimiento</h2>
+      <p className="sub">Donación o compra: entra a la despensa. Consumo: se descuenta. Sin precios obligatorios.</p>
+      <div className="form-grid cols-3" style={{ marginTop: 16 }}>
+        <div className="field"><label htmlFor="desFecha">Fecha</label><input id="desFecha" className="input" type="date" value={fecha} onChange={(ev) => setFecha(ev.target.value)} /></div>
+        <div className="field"><label htmlFor="desTipo">Tipo</label>
+          <select id="desTipo" className="input" value={tipo} onChange={(ev) => setTipo(ev.target.value)}>
+            <option value="donacion">Donación</option>
+            <option value="compra">Compra</option>
+            <option value="consumo">Consumo</option>
+          </select>
+        </div>
+        <div className="field"><label htmlFor="desNombre">Alimento</label>
+          <input id="desNombre" className="input" type="text" autoComplete="off" list="alimentosConocidos" maxLength={60} placeholder="Ej.: arroz, harina, verduras" value={nombre} onChange={(ev) => setNombre(ev.target.value)} />
+        </div>
+        <div className="field"><label htmlFor="desCant">Cantidad</label><input id="desCant" className="input" type="text" inputMode="decimal" autoComplete="off" placeholder="Ej.: 10" value={cant} onChange={(ev) => setCant(ev.target.value)} onKeyDown={(ev) => { if (ev.key === "Enter") guardar(); }} /></div>
+        <div className="field"><label htmlFor="desUnidad">Unidad</label>
+          <select id="desUnidad" className="input" value={unidad} onChange={(ev) => setUnidad(ev.target.value)}>
+            {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
+          </select>
+        </div>
+        {esDonacion && <div className="field"><label htmlFor="desValor">Valor estimado <span className="muted">(opcional)</span></label><input id="desValor" className="input" type="text" inputMode="decimal" autoComplete="off" placeholder="Ej.: 15000" value={valor} onChange={(ev) => setValor(ev.target.value)} /><span className="hint">Si lo sabés. Sirve para estimar el valor de lo que donan; si no, dejalo vacío.</span></div>}
+        {!esDonacion && <div className="field"><label htmlFor="desDetalle">Detalle <span className="muted">(opcional)</span></label><input id="desDetalle" className="input" type="text" maxLength={80} placeholder="Ej.: garrafa, mercado del barrio" value={detalle} onChange={(ev) => setDetalle(ev.target.value)} /></div>}
+      </div>
+      {esDonacion && <div className="field" style={{ marginTop: 8 }}><label htmlFor="desDetalleD">Detalle <span className="muted">(opcional)</span></label><input id="desDetalleD" className="input" type="text" maxLength={80} placeholder="Ej.: donación del negocio de la esquina" value={detalle} onChange={(ev) => setDetalle(ev.target.value)} /></div>}
+      <div className="row" style={{ marginTop: 12 }}>
+        <button type="button" className="btn btn-primary" onClick={guardar}>Registrar</button>
+      </div>
+    </div>
   );
 }
 
-function Despensa({ c, mes, irA, version }) {
+function Movimiento({ m, onQuitar }) {
+  const etiqueta = m.tipo === "donacion" ? "Donación" : m.tipo === "compra" ? "Compra" : "Consumo";
+  const chip = m.tipo === "donacion" ? "ok" : m.tipo === "consumo" ? "warn" : "linea";
+  return (
+    <div className="day">
+      <span>{fechaDia(m.fecha)}</span>
+      <span className={"badge " + chip}>{etiqueta}</span>
+      <span className="q" style={{ maxWidth: "45%", textAlign: "right" }}>{m.itemNombre} · {O.txtCant(m.cantidad, m.unidad)}{m.valor ? " · " + F.pesos(m.valor) : ""}</span>
+      <button type="button" className="btn btn-quiet icon-btn" aria-label={"Quitar el movimiento del " + fechaDia(m.fecha)} onClick={onQuitar}>×</button>
+    </div>
+  );
+}
+
+function Despensa({ mes, setMes }) {
   const toast = useToast();
-  const copiar = useCopiar();
-  const [pedido, setPedido] = useState(null);
-  const [reinicio, setReinicio] = useState(0);
-  const pedidoRef = useRef(null);
-  const hay = c.t.personas > 0;
-  const lista = useMemo(() => C.lista(c.t.ae, c.v.dias, c.v.porcion), [c.t.ae, c.v.dias, c.v.porcion]);
-  const items = O.faltantes(lista, c.e.stock);
-  const firma = lista.map((x) => x.id + ":" + Math.round(x.base)).join("|") + "#" + c.t.personas;
-  let cubiertos = 0, suma = 0;
-  items.forEach((it) => { if (it.falta <= 0) cubiertos++; suma += it.cobertura; });
+  const e = useEstado();
+  const inv = e.inventario;
+  const movs = e.movimientos.filter((m) => O.mesDe(m.fecha) === mes).sort((a, b) => (a.fecha < b.fecha ? 1 : -1));
+  const nombres = [...new Set(inv.map((i) => i.nombre))];
 
-  useEffect(() => { if (pedido !== null && pedidoRef.current) pedidoRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, [pedido === null]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const armarPedido = () => {
-    const url = esWeb() && c.e.org.alias ? urlDonar(c, mes) : "";
-    const t = O.pedidoTexto(c.e.org.nombre, items, { max: 10, url });
-    if (!t) { toast("No falta nada: ya tenés todo lo necesario."); return; }
-    setPedido(t);
+  const quitarMovimiento = (m) => {
+    store.actualizar((s) => {
+      // quitar un ingreso devuelve lo anotado al inventario anterior; quitar un consumo lo vuelve a sumar
+      if (m.tipo === "consumo") s.inventario = O.ingresoInventario(s.inventario, { nombre: m.itemNombre, cantidad: m.cantidad, unidad: m.unidad });
+      else s.inventario = O.consumirInventario(s.inventario, { nombre: m.itemNombre, cantidad: m.cantidad, unidad: m.unidad });
+      s.movimientos = s.movimientos.filter((x) => x.id !== m.id);
+    });
+    toast("Movimiento quitado (el inventario quedó como estaba antes).");
+  };
+  const quitarItem = (i) => {
+    if (!window.confirm("¿Quitar " + i.nombre + " del inventario? Si fue un error, volvé a anotarlo.")) return;
+    store.actualizar((s) => { s.inventario = s.inventario.filter((x) => x.id !== i.id); });
   };
 
   return (
     <section id="p-despensa" role="tabpanel" aria-labelledby="tab-despensa">
       <div className="panel-head">
         <p className="eyebrow">Despensa</p>
-        <h1>Despensa</h1>
-        <p>Anotá lo que tenés y te decimos qué falta para el mes, con las cantidades de la canasta oficial del INDEC para tu grupo. De ahí sale la lista para pedir.</p>
+        <h1>Inventario de alimentos</h1>
+        <p>Anotá lo que tenés, lo que compran y lo que donan. Las donaciones entran a la despensa y se descuentan solas de la lista de compras, que sale de tus comidas planificadas (pestaña Comidas).</p>
       </div>
 
-      {!hay && <div className="callout warn" style={{ marginBottom: 20 }}>Todavía no cargaste personas, así que no hay cantidades necesarias. <a href="#calcular" onClick={(ev) => { ev.preventDefault(); irA("calcular"); }}>Cargalas en Calcular</a>.</div>}
+      <datalist id="alimentosConocidos">{nombres.map((n) => <option key={n} value={n} />)}</datalist>
 
-      <div className="row" style={{ justifyContent: "space-between", marginBottom: 16 }}>
-        <p className="small muted" id="despResumen" aria-live="polite">{hay ? cubiertos + " de " + items.length + " alimentos cubiertos · cobertura promedio " + F.num(suma / items.length, 0) + " %" : ""}</p>
-        <div className="row">
-          <button type="button" className="btn btn-primary" disabled={!hay} onClick={armarPedido}>Armar pedido</button>
-          <button type="button" className="btn" disabled={!hay} onClick={() => imprimir("despensa")}>Imprimir lista</button>
-          <button type="button" className="btn btn-quiet" disabled={!hay} onClick={() => { if (window.confirm("¿Vaciar todo lo que anotaste en la despensa?")) { store.actualizar((e) => { e.stock = {}; }); setReinicio((n) => n + 1); toast("Despensa vaciada."); } }}>Vaciar lo que tengo</button>
-        </div>
-      </div>
+      <FormMovimiento mes={mes} setMes={setMes} />
 
-      {pedido !== null && (
-        <div className="card" ref={pedidoRef} style={{ marginBottom: 20 }}>
-          <h2>Pedido listo para enviar</h2>
-          <p className="sub">Lo más urgente primero. Podés editarlo antes de mandarlo.</p>
-          <textarea className="pedido" style={{ marginTop: 16 }} aria-label="Texto del pedido" value={pedido} onChange={(ev) => setPedido(ev.target.value)} />
-          <div className="row" style={{ marginTop: 12 }}>
-            <button type="button" className="btn btn-primary" onClick={() => copiar(pedido, "Pedido copiado.")}>Copiar</button>
-            <button type="button" className="btn" onClick={() => window.open("https://wa.me/?text=" + encodeURIComponent(pedido), "_blank", "noopener")}>Enviar por WhatsApp</button>
+      <div className="grid-2" style={{ marginTop: 20 }}>
+        <div className="stack">
+          <div className="card">
+            <div className="row" style={{ justifyContent: "space-between" }}><h2 style={{ margin: 0 }}>Lo que hay hoy</h2><span className="small muted">{inv.length ? inv.length + " alimentos" : ""}</span></div>
+            <div className="table-wrap" style={{ marginTop: 12 }}>
+              <table className="table">
+                <thead><tr><th scope="col">Alimento</th><th scope="col" className="r">Cantidad</th><th scope="col">Vence</th><th scope="col" /></tr></thead>
+                <tbody>
+                  {!inv.length && <tr><td colSpan={4}><p className="empty">Despensa vacía. Anotá arriba una donación o compra para empezar.</p></td></tr>}
+                  {inv.map((i) => (
+                    <tr key={i.id}>
+                      <td>{i.nombre}{i.vence && i.vence < O.hoyISO() && <small>Vencido</small>}</td>
+                      <td className="r">{O.txtCant(i.cantidad, i.unidad)}</td>
+                      <td>{i.vence ? <span className="small muted">{fechaCorta(i.vence)}</span> : <span className="muted">—</span>}</td>
+                      <td><button type="button" className="btn btn-quiet icon-btn" aria-label={"Quitar " + i.nombre + " del inventario"} onClick={() => quitarItem(i)}>×</button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      )}
 
-      <div className="table-wrap" style={{ maxHeight: "none" }}>
-        <table className="table" id="tablaDesp">
-          <thead><tr><th scope="col">Alimento</th><th scope="col" className="r">Necesario</th><th scope="col" className="r">Tenemos</th><th scope="col" className="r">Falta</th><th scope="col">Cubierto</th></tr></thead>
-          <tbody key={firma + ":" + version + ":" + reinicio}>
-            {hay && items.map((it) => <FilaDespensa key={it.id} it={it} />)}
-          </tbody>
-        </table>
+        <aside className="stack">
+          <div className="card">
+            <div className="row" style={{ justifyContent: "space-between" }}><h2 style={{ margin: 0 }}>Movimientos del mes</h2><div className="field"><label className="visually-hidden" htmlFor="mesDes">Mes</label><input id="mesDes" className="input" type="month" style={{ minHeight: 38 }} value={mes} onChange={(ev) => { if (mesValido(ev.target.value)) setMes(ev.target.value); }} /></div></div>
+            <div className="days" style={{ marginTop: 12 }}>
+              {!movs.length && <p className="empty">Sin movimientos este mes.</p>}
+              {movs.map((m) => <Movimiento key={m.id} m={m} onQuitar={() => quitarMovimiento(m)} />)}
+            </div>
+            <p className="hint" style={{ marginTop: 12 }}>Si quitás un movimiento, el inventario vuelve a como estaba antes de anotarlo.</p>
+          </div>
+          <p className="hint">La despensa es de alimentos reales: lo que realmente compran, donan y consumen. No es la canasta del INDEC, que sigue siendo la referencia económica para calcular costos.</p>
+        </aside>
       </div>
-      <p className="callout" style={{ marginTop: 20 }}><strong>Es una referencia estadística</strong> construida por el INDEC a partir de lo que come la población (ENGHo 2004/05). <strong>No es un menú ni una indicación nutricional</strong>: para eso consultá a un/a nutricionista.</p>
+    </section>
+  );
+}
 
-      <div id="imprimirDespensa" className="print-only" aria-hidden="true">
-        <h2>Despensa — {c.e.org.nombre || "mi comedor"}</h2>
-        <p>Canasta oficial del INDEC para {c.t.personas} personas · {c.v.dias} días · {EDICION} · impreso el {O.hoyISO()}</p>
+/* ───────── COMIDAS (recetas y lista de compras) ───────── */
+function FormReceta({ inicial, onListo }) {
+  const toast = useToast();
+  const [nombre, setNombre] = useState(inicial ? inicial.nombre : "");
+  const [personas, setPersonas] = useState(inicial ? String(inicial.personas) : "");
+  const [filas, setFilas] = useState(inicial ? inicial.ingredientes.map((i) => ({ ...i })) : [{ nombre: "", cantidad: "", unidad: "g" }]);
+  const filaVacia = { nombre: "", cantidad: "", unidad: "g" };
+
+  const cambiarFila = (i, campo, valor) => setFilas((fs) => fs.map((f, j) => (j === i ? { ...f, [campo]: valor } : f)));
+  const quitarFila = (i) => setFilas((fs) => (fs.length > 1 ? fs.filter((_, j) => j !== i) : fs));
+
+  const guardar = () => {
+    const nom = nombre.trim();
+    if (!nom) return toast("Poné el nombre de la receta.");
+    const rinde = Number(personas);
+    if (!isFinite(rinde) || rinde < 1) return toast("¿Para cuántas porciones alcanza la receta?");
+    const ings = [];
+    for (const f of filas) {
+      const n = f.nombre.trim();
+      const c = Number(String(f.cantidad).replace(/\./g, "").replace(",", "."));
+      if (!n && !f.cantidad) continue; // fila vacía: se ignora
+      if (!n) return toast("Hay un ingrediente sin nombre.");
+      if (!isFinite(c) || c <= 0) return toast("Poné la cantidad de " + n + ".");
+      ings.push({ nombre: n, cantidad: Math.round(c * 1000) / 1000, unidad: f.unidad });
+    }
+    if (!ings.length) return toast("Agregá al menos un ingrediente.");
+    store.actualizar((s) => {
+      if (inicial) {
+        const r = s.recetas.find((x) => x.id === inicial.id);
+        if (r) { r.nombre = nom; r.personas = Math.min(5000, Math.max(1, Math.round(rinde))); r.ingredientes = ings; }
+      } else {
+        s.recetas.push({ id: S.nuevoId(), nombre: nom, personas: Math.min(5000, Math.max(1, Math.round(rinde))), ingredientes: ings });
+      }
+    });
+    onListo();
+    toast(inicial ? "Receta actualizada." : "Receta guardada.");
+  };
+
+  return (
+    <div className="card">
+      <h2>{inicial ? "Editar receta" : "Nueva receta"}</h2>
+      <div className="form-grid cols-2" style={{ marginTop: 16 }}>
+        <div className="field"><label htmlFor="recNombre">Nombre de la receta</label><input id="recNombre" className="input" type="text" maxLength={60} placeholder="Ej.: Guiso de fideos" value={nombre} onChange={(ev) => setNombre(ev.target.value)} /></div>
+        <div className="field"><label htmlFor="recRinde">Para cuántas porciones alcanza</label><input id="recRinde" className="input" type="text" inputMode="numeric" placeholder="Ej.: 10" value={personas} onChange={(ev) => setPersonas(digitos(ev.target.value, 4))} /></div>
+      </div>
+      <p className="label" style={{ margin: "16px 0 8px" }}>Ingredientes (cantidades de la receta completa)</p>
+      {filas.map((f, i) => (
+        <div key={i} className="row" style={{ gap: 8, marginBottom: 8 }}>
+          <input className="input" type="text" aria-label={"Ingrediente " + (i + 1)} list="alimentosConocidos" maxLength={40} placeholder="Ingrediente" value={f.nombre} onChange={(ev) => cambiarFila(i, "nombre", ev.target.value)} style={{ flex: "2 1 160px" }} />
+          <input className="input" type="text" inputMode="decimal" aria-label={"Cantidad de " + (i === 0 ? "un kilo de harina" : "un ingrediente")} placeholder="Cant." value={f.cantidad} onChange={(ev) => cambiarFila(i, "cantidad", ev.target.value)} style={{ flex: "1 1 90px" }} />
+          <select className="input" aria-label="Unidad" value={f.unidad} onChange={(ev) => cambiarFila(i, "unidad", ev.target.value)} style={{ flex: "0 1 110px" }}>
+            {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
+          </select>
+          <button type="button" className="btn btn-quiet icon-btn" aria-label={"Quitar el ingrediente " + (i + 1)} onClick={() => quitarFila(i)} disabled={filas.length === 1}>×</button>
+        </div>
+      ))}
+      <div className="row" style={{ marginTop: 12 }}>
+        <button type="button" className="btn btn-quiet" onClick={() => setFilas((fs) => [...fs, { ...filaVacia }])}>Agregar ingrediente</button>
+        <button type="button" className="btn btn-primary" onClick={guardar}>{inicial ? "Actualizar receta" : "Guardar receta"}</button>
+        <button type="button" className="btn btn-quiet" onClick={() => onListo()}>Cancelar</button>
+      </div>
+      <p className="hint" style={{ marginTop: 10 }}>Las cantidades son las de tu receta real: no son una recomendación nutricional.</p>
+    </div>
+  );
+}
+
+function Comidas({ mes, setMes }) {
+  const toast = useToast();
+  const copiar = useCopiar();
+  const [editando, setEditando] = useState(null); // receta en edición, o null
+  const [cocFecha, setCocFecha] = useState(O.hoyISO());
+  const [cocReceta, setCocReceta] = useState("");
+  const [cocPersonas, setCocPersonas] = useState("");
+  const [pedido, setPedido] = useState(null);
+
+  const e = useEstado();
+  const recetas = e.recetas;
+  const comidasMes = e.comidas.filter((c) => O.mesDe(c.fecha) === mes).sort((a, b) => (a.fecha < b.fecha ? 1 : -1));
+  const inventario = e.inventario;
+
+  const necesidades = useMemo(() => O.necesidadesDeComidas(e.recetas, e.comidas, mes), [mes, e.recetas, e.comidas]);
+  const compras = O.comprasPendientes(necesidades, inventario);
+  const faltanAlgo = compras.some((c) => c.falta > 0);
+  const nombreReceta = (id) => { const r = recetas.find((x) => x.id === id); return r ? r.nombre : "—"; };
+
+  const cocinar = () => {
+    const r = recetas.find((x) => x.id === cocReceta);
+    if (!r) return toast("Elegí una receta para cocinar.");
+    const personas = Number(cocPersonas);
+    if (!S.fechaOk(cocFecha)) return toast("Poné una fecha válida.");
+    if (!isFinite(personas) || personas < 1) return toast("¿Para cuántas personas cocinás?");
+    store.actualizar((s) => {
+      s.comidas.push({ id: S.nuevoId(), fecha: cocFecha, recetaId: r.id, personas: Math.min(5000, Math.max(1, Math.round(personas))) });
+      const f = Math.min(5000, Math.max(1, Math.round(personas))) / r.personas;
+      r.ingredientes.forEach((i) => {
+        const cantidad = Math.round(i.cantidad * f * 1000) / 1000;
+        s.inventario = O.consumirInventario(s.inventario, { nombre: i.nombre, cantidad, unidad: i.unidad });
+        s.movimientos.push({ id: S.nuevoId(), fecha: cocFecha, tipo: "consumo", itemNombre: i.nombre, cantidad, unidad: i.unidad, valor: null, detalle: r.nombre });
+      });
+      if (s.movimientos.length > S.MAX_ITEMS) s.movimientos.splice(0, s.movimientos.length - S.MAX_ITEMS);
+    });
+    setMes(O.mesDe(cocFecha));
+    setCocPersonas("");
+    toast("Cocinaste " + r.nombre + " para " + personas + ". El inventario se actualizó.");
+  };
+
+  const quitarComida = (c) => {
+    store.actualizar((s) => {
+      const comida = s.comidas.find((x) => x.id === c.id);
+      if (!comida) return;
+      const r = s.recetas.find((x) => x.id === comida.recetaId);
+      if (r) {
+        const f = comida.personas / r.personas;
+        r.ingredientes.forEach((i) => {
+          s.inventario = O.ingresoInventario(s.inventario, { nombre: i.nombre, cantidad: Math.round(i.cantidad * f * 1000) / 1000, unidad: i.unidad });
+        });
+      }
+      s.comidas = s.comidas.filter((x) => x.id !== c.id);
+      s.movimientos = s.movimientos.filter((x) => !(mesDe(x.fecha) === O.mesDe(c.fecha) && x.tipo === "consumo" && x.detalle === (r ? r.nombre : "")));
+    });
+    toast("Comida quitada (los ingredientes volvieron al inventario).");
+  };
+
+  const armarPedido = () => {
+    const t = O.pedidoComprasTexto(e.org.nombre, compras, { max: 12 });
+    if (!t) { toast("No falta nada: con lo que hay en la despensa alcanza."); return; }
+    setPedido(t);
+  };
+
+  return (
+    <section id="p-comidas" role="tabpanel" aria-labelledby="tab-comidas">
+      <div className="panel-head">
+        <p className="eyebrow">Comidas</p>
+        <h1>Recetas y lista de compras</h1>
+        <p>Cargá tus recetas con sus ingredientes reales, anotá qué cocinás y la herramienta calcula cuánto necesitás y qué falta comprar. Las cantidades son las tuyas, no una recomendación nutricional.</p>
+      </div>
+
+      <div className="grid-2">
+        <div className="stack">
+          {editando === "nueva" ? <FormReceta onListo={() => setEditando(null)} /> : editando ? <FormReceta key={editando.id} inicial={editando} onListo={() => setEditando(null)} /> : null}
+          {!editando && (
+            <div className="card">
+              <div className="row" style={{ justifyContent: "space-between" }}><h2 style={{ margin: 0 }}>Mis recetas</h2><button type="button" className="btn btn-primary" onClick={() => setEditando("nueva")}>Nueva receta</button></div>
+              {!recetas.length && <p className="empty" style={{ marginTop: 12 }}>Todavía no cargaste recetas. Con una o dos (el guiso de siempre, la sopa de siempre) ya alcanza para armar la lista de compras.</p>}
+              <ul className="recetas" style={{ marginTop: 12 }}>
+                {recetas.map((r) => (
+                  <li key={r.id} className="receta">
+                    <div className="row" style={{ justifyContent: "space-between" }}>
+                      <div>
+                        <b>{r.nombre}</b>
+                        <p className="small muted">Para {F.num(r.personas, 0)} porciones · {r.ingredientes.length} ingredientes</p>
+                      </div>
+                      <div className="row" style={{ gap: 6 }}>
+                        <button type="button" className="btn btn-sm" onClick={() => setEditando(r)}>Editar</button>
+                        <button type="button" className="btn btn-quiet icon-btn" aria-label={"Quitar la receta " + r.nombre} onClick={() => { if (window.confirm("¿Quitar la receta " + r.nombre + "? Las comidas ya cocinadas no se tocan.")) store.actualizar((s) => { s.recetas = s.recetas.filter((x) => x.id !== r.id); }); }}>×</button>
+                      </div>
+                    </div>
+                    <p className="small muted" style={{ marginTop: 6 }}>{r.ingredientes.map((i) => i.nombre + " " + O.txtCant(i.cantidad, i.unidad)).join(" · ")}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="card">
+            <h2>Cocinar una receta</h2>
+            <p className="sub">Anota lo que cocinaste o vas a cocinar: descuenta los ingredientes del inventario y suma a la lista de compras.</p>
+            <div className="form-grid cols-3" style={{ marginTop: 16 }}>
+              <div className="field"><label htmlFor="cocFecha">Fecha</label><input id="cocFecha" className="input" type="date" value={cocFecha} onChange={(ev) => setCocFecha(ev.target.value)} /></div>
+              <div className="field"><label htmlFor="cocReceta">Receta</label>
+                <select id="cocReceta" className="input" value={cocReceta} onChange={(ev) => setCocReceta(ev.target.value)}>
+                  <option value="">Elegir receta…</option>
+                  {recetas.map((r) => <option key={r.id} value={r.id}>{r.nombre} (para {F.num(r.personas, 0)})</option>)}
+                </select>
+              </div>
+              <div className="field"><label htmlFor="cocPersonas">Personas</label><input id="cocPersonas" className="input" type="text" inputMode="numeric" placeholder="Ej.: 60" value={cocPersonas} onChange={(ev) => setCocPersonas(digitos(ev.target.value, 4))} onKeyDown={(ev) => { if (ev.key === "Enter") cocinar(); }} /></div>
+            </div>
+            <div className="row" style={{ marginTop: 12 }}>
+              <button type="button" className="btn btn-primary" disabled={!recetas.length} onClick={cocinar}>Cocinar y descontar del inventario</button>
+            </div>
+          </div>
+        </div>
+
+        <aside className="stack">
+          <div className="card">
+            <div className="row" style={{ justifyContent: "space-between" }}><h2 style={{ margin: 0 }}>Comidas del mes</h2><div className="field"><label className="visually-hidden" htmlFor="mesCom">Mes</label><input id="mesCom" className="input" type="month" style={{ minHeight: 38 }} value={mes} onChange={(ev) => { if (mesValido(ev.target.value)) setMes(ev.target.value); }} /></div></div>
+            {!comidasMes.length && <p className="empty" style={{ marginTop: 12 }}>Sin comidas anotadas este mes.</p>}
+            <ul className="days" style={{ marginTop: 12 }}>
+              {comidasMes.map((c) => (
+                <li key={c.id} className="day">
+                  <span>{fechaDia(c.fecha)}</span>
+                  <span className="q" style={{ maxWidth: "55%", textAlign: "right" }}>{nombreReceta(c.recetaId)} · {F.num(c.personas, 0)} personas</span>
+                  <button type="button" className="btn btn-quiet icon-btn" aria-label={"Quitar la comida del " + fechaDia(c.fecha)} onClick={() => quitarComida(c)}>×</button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="card" id="listaCompras">
+            <h2>Lista de compras del mes</h2>
+            <p className="sub">Lo que piden tus comidas, menos lo que hay en la despensa. Las donaciones anotadas ya están descontadas.</p>
+            <div className="table-wrap" style={{ marginTop: 12 }}>
+              <table className="table">
+                <thead><tr><th scope="col">Alimento</th><th scope="col" className="r">Necesario</th><th scope="col" className="r">Hay</th><th scope="col" className="r">Falta</th></tr></thead>
+                <tbody>
+                  {!compras.length && <tr><td colSpan={4}><p className="empty">Planificá comidas para armar la lista.</p></td></tr>}
+                  {compras.map((c) => (
+                    <tr key={c.nombre + c.unidad}>
+                      <td>{c.nombre}</td>
+                      <td className="r">{O.txtCant(c.necesario, c.unidad)}</td>
+                      <td className="r">{c.hay > 0 ? O.txtCant(c.hay, c.unidad) : "—"}</td>
+                      <td className={"r" + (c.falta > 0 ? " falta" : "")}>{c.falta > 0 ? O.txtCant(c.falta, c.unidad) : "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="row" style={{ marginTop: 12 }}>
+              <button type="button" className="btn btn-primary" disabled={!faltanAlgo} onClick={armarPedido}>Armar pedido</button>
+              <button type="button" className="btn" disabled={!compras.length} onClick={() => imprimir("compras")}>Imprimir lista</button>
+            </div>
+            {pedido !== null && (
+              <div style={{ marginTop: 16 }}>
+                <p className="label" style={{ marginBottom: 8 }}>Pedido listo para enviar</p>
+                <textarea className="pedido" aria-label="Texto del pedido" value={pedido} onChange={(ev) => setPedido(ev.target.value)} />
+                <div className="row" style={{ marginTop: 12 }}>
+                  <button type="button" className="btn btn-primary" onClick={() => copiar(pedido, "Pedido copiado.")}>Copiar</button>
+                  <button type="button" className="btn" onClick={() => window.open("https://wa.me/?text=" + encodeURIComponent(pedido), "_blank", "noopener")}>Enviar por WhatsApp</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
+
+      <div id="imprimirCompras" className="print-only" aria-hidden="true">
+        <h2>Lista de compras — {e.org.nombre || "mi comedor"}</h2>
+        <p>Mes {mes} · impreso el {O.hoyISO()}</p>
         <ul style={{ paddingLeft: 18 }}>
-          {items.map((it) => <li key={it.id}>☐ {it.etq}: falta {it.falta > 0 ? O.txtCantidad(it.falta, it.baseUnidad) : "nada"} (necesario {O.txtCantidad(it.necesario, it.baseUnidad)}, hay {O.txtCantidad(it.tiene, it.baseUnidad)})</li>)}
+          {compras.filter((c) => c.falta > 0).map((c) => <li key={c.nombre + c.unidad}>☐ {c.nombre}: {O.txtCant(c.falta, c.unidad)}</li>)}
         </ul>
       </div>
     </section>
@@ -446,7 +753,7 @@ function Raciones({ c, mes, setMes }) {
   const [cant, setCant] = useState("");
   const r = O.racionesMes(e, mes);
   const pv = O.planVsReal(e, mes, c.t.personas, c.v.dias);
-  const cpr = O.costoPorRacion(e, mes);
+  const rc = O.resumenCostos(e, mes);
   const ref = c.porPersonaDia;
   const dias = Object.keys(e.raciones).filter((f) => O.mesDe(f) === mes).sort();
 
@@ -515,11 +822,18 @@ function Raciones({ c, mes, setMes }) {
             <div className="bar lg ok" style={{ marginTop: 10 }}><i style={{ width: Math.min(100, pv.pct || 0) + "%" }} /></div>
             <p className="hint" style={{ marginTop: 10 }}>{pv.pct === null ? "Cargá personas en Calcular para comparar contra lo planificado." : F.num(pv.real, 0) + " servidas de " + F.num(pv.plan, 0) + " planificadas (" + c.t.personas + " personas × " + c.v.dias + " días)."}</p>
           </div>
-          <p className="hint">
-            {cpr
-              ? "Costo real por ración en alimentos: " + F.pesos(cpr) + " (gastos en alimentos del mes ÷ raciones). No incluye comida donada en especie." + (ref ? " La canasta del INDEC estima " + F.pesos(ref) + " por servicio." : "")
-              : "Cuando cargues gastos en alimentos y raciones, acá vas a ver cuánto cuesta cada ración."}
-          </p>
+          <div className="card">
+            <h2 style={{ margin: 0 }}>Costos de este mes</h2>
+            <div className="row" style={{ justifyContent: "space-between", marginTop: 10 }}><span className="small muted">Gasto monetario por ración</span><b className="num">{rc.gastoPorRacion === null ? "—" : F.pesos(rc.gastoPorRacion)}</b></div>
+            <div className="row" style={{ justifyContent: "space-between", marginTop: 8 }}><span className="small muted">Costo económico estimado por ración</span><b className="num">{rc.costoEconomicoPorRacion === null ? "—" : F.pesos(rc.costoEconomicoPorRacion)}</b></div>
+            {rc.valorDonaciones > 0 && <div className="row" style={{ justifyContent: "space-between", marginTop: 8 }}><span className="small muted">Valor estimado de lo donado</span><b className="num">{F.pesos(rc.valorDonaciones)}</b></div>}
+            <p className="hint" style={{ marginTop: 10 }}>
+              {rc.raciones === 0
+                ? "Cuando cargues raciones de este mes, acá vas a ver el costo por ración."
+                : "El gasto monetario por ración es solo el dinero puesto por la organización (gastos en alimentos ÷ raciones). El costo económico estimado suma el valor de los alimentos donados cuando se lo anotaron en Despensa; si no se anota, no lo incluye."}
+              {ref ? " Como referencia, la canasta del INDEC estima " + F.pesos(ref) + " por servicio." : ""}
+            </p>
+          </div>
         </aside>
       </div>
     </section>
@@ -845,7 +1159,8 @@ function App() {
           <main id="principal" className="wrap">
             {tab === "calcular" && <Calcular c={c} irA={irA} />}
             {tab === "presupuesto" && <Presupuesto c={c} mes={mes} setMes={setMes} irA={irA} />}
-            {tab === "despensa" && <Despensa c={c} mes={mes} irA={irA} version={version} />}
+            {tab === "despensa" && <Despensa mes={mes} setMes={setMes} />}
+            {tab === "comidas" && <Comidas mes={mes} setMes={setMes} />}
             {tab === "raciones" && <Raciones c={c} mes={mes} setMes={setMes} />}
             {tab === "compartir" && <Compartir c={c} mes={mes} version={version} onCambioTotal={() => setVersion((v) => v + 1)} />}
           </main>

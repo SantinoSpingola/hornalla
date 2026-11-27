@@ -2,24 +2,33 @@
  * Almacén local de Hornalla. Todo queda en el navegador de quien lo usa (localStorage): nada se envía a ningún servidor.
  * Límite honesto: los datos viven en ESE navegador y ESE dispositivo. Por eso hay exportar/importar (copia de seguridad).
  * No guarda nombres de personas asistidas ni de donantes: solo cantidades, montos y texto libre corto de la organización.
+ *
+ * v2 (2026-11): inventario real, movimientos (compras y donaciones), recetas y comidas planificadas.
+ * La migración desde v1 es automática: el stock viejo (anotado contra la canasta del INDEC) pasa a inventario,
+ * excepto las bebidas alcohólicas, que no son una compra sugerida para un comedor.
  */
 (function (root, factory) {
-  if (typeof module === "object" && module.exports) module.exports = factory();
-  else root.Store = factory();
-})(typeof self !== "undefined" ? self : this, function () {
-  var CLAVE = "hornalla:v1";
+  if (typeof module === "object" && module.exports) module.exports = factory(require("./referencia.js"));
+  else root.Store = factory(root.REFERENCIA_INDEC);
+})(typeof self !== "undefined" ? self : this, function (REF) {
+  var CLAVE = "hornalla:v1"; // sin cambio de clave: la migración es interna
   var MAX_ITEMS = 5000;
   var RUBROS = ["alimentos", "gas", "utensilios", "limpieza", "otros"];
+  var UNIDADES = ["g", "kg", "cc", "litros", "unidad", "docena"];
 
   function defaults() {
     return {
-      v: 1,
+      v: 2,
       org: { nombre: "", alias: "", titular: "", mensaje: "" },
       grupo: { sel: {}, dias: 30, porcion: 100 },
       ingresos: [],
       gastos: [],
       stock: {},
       raciones: {},
+      inventario: [],
+      movimientos: [],
+      recetas: [],
+      comidas: [],
       opciones: { recibido: true, servidas: true },
     };
   }
@@ -31,6 +40,10 @@
     var n = Math.floor(Number(v));
     return isFinite(n) ? Math.min(max, Math.max(min, n)) : def;
   }
+  function decimal(v, min, max, def) {
+    var n = Number(String(v).replace(",", "."));
+    return isFinite(n) ? Math.min(max, Math.max(min, Math.round(n * 1000) / 1000)) : def;
+  }
   function fechaOk(f) {
     if (typeof f !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(f)) return false;
     var d = new Date(f + "T00:00:00Z");
@@ -38,6 +51,31 @@
   }
   function nuevoId() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+  function unidadOk(u) { return UNIDADES.indexOf(u) >= 0; }
+
+  /** Cantidad con unidad → gramos o cc (solo para unidades de medida, no para unidad/docena). */
+  function aBase(cantidad, unidad) {
+    if (unidad === "kg" || unidad === "litros") return cantidad * 1000;
+    if (unidad === "g" || unidad === "cc") return cantidad;
+    return null;
+  }
+
+  /** Migración v1 → v2: stock anotado contra la canasta pasa a inventario con su etiqueta oficial. */
+  function migrarStockV1(stock) {
+    var comp = {};
+    (REF && REF.composicion ? REF.composicion : []).forEach(function (c) { comp[c.id] = c; });
+    var items = [];
+    Object.keys(stock || {}).forEach(function (id) {
+      if (id === "beb_alc") return; // la canasta incluye bebidas alcohólicas; nunca sugerimos esa compra
+      var c = comp[id];
+      var base = Number(stock[id]);
+      if (!isFinite(base) || base <= 0) return;
+      var nombre = c ? c.etq : txt(id.replace(/_/g, " "), 60);
+      var unidad = c && c.u === "cc" ? "litros" : "kg";
+      items.push({ id: nuevoId(), nombre: nombre, cantidad: Math.round((base / 1000) * 100) / 100, unidad: unidad, vence: "" });
+    });
+    return items;
   }
 
   /** Acepta cualquier cosa y devuelve un estado válido. Nunca lanza. */
@@ -85,6 +123,63 @@
       var n = entero(raw.raciones[f], 0, 99999, 0);
       if (n > 0) e.raciones[f] = n;
     });
+
+    /* Inventario: alimentos reales con nombre libre, cantidad, unidad y vencimiento opcional. */
+    (Array.isArray(raw.inventario) ? raw.inventario : []).slice(0, 300).forEach(function (r) {
+      if (!r) return;
+      var nombre = txt(r.nombre, 60);
+      var cant = decimal(r.cantidad, 0, 1e6, 0);
+      if (!nombre || cant <= 0 || !unidadOk(r.unidad)) return;
+      e.inventario.push({ id: txt(r.id, 20) || nuevoId(), nombre: nombre, cantidad: cant, unidad: r.unidad, vence: fechaOk(r.vence) ? r.vence : "" });
+    });
+
+    /* Movimientos de despensa: compras, donaciones y consumo. El valor es opcional (estimación propia). */
+    (Array.isArray(raw.movimientos) ? raw.movimientos : []).slice(0, MAX_ITEMS).forEach(function (r) {
+      if (!r || !fechaOk(r.fecha)) return;
+      var tipo = ["compra", "donacion", "consumo"].indexOf(r.tipo) >= 0 ? r.tipo : "";
+      var nombre = txt(r.itemNombre, 60);
+      var cant = decimal(r.cantidad, 0, 1e6, 0);
+      if (!tipo || !nombre || cant <= 0 || !unidadOk(r.unidad)) return;
+      var valor = Number(r.valor);
+      e.movimientos.push({
+        id: txt(r.id, 20) || nuevoId(), fecha: r.fecha, tipo: tipo, itemNombre: nombre,
+        cantidad: cant, unidad: r.unidad,
+        valor: isFinite(valor) && valor > 0 ? Math.round(valor * 100) / 100 : null,
+        detalle: txt(r.detalle, 80),
+      });
+    });
+
+    /* Recetas propias: ingredientes con nombre libre y cantidad configurable. */
+    (Array.isArray(raw.recetas) ? raw.recetas : []).slice(0, 200).forEach(function (r) {
+      if (!r) return;
+      var nombre = txt(r.nombre, 60);
+      var personas = entero(r.personas, 1, 5000, 0);
+      if (!nombre || personas <= 0) return;
+      var ings = [];
+      (Array.isArray(r.ingredientes) ? r.ingredientes : []).slice(0, 30).forEach(function (i) {
+        if (!i) return;
+        var n = txt(i.nombre, 40);
+        var c = decimal(i.cantidad, 0, 1e6, 0);
+        if (!n || c <= 0 || !unidadOk(i.unidad)) return;
+        ings.push({ nombre: n, cantidad: c, unidad: i.unidad });
+      });
+      e.recetas.push({ id: txt(r.id, 20) || nuevoId(), nombre: nombre, personas: personas, ingredientes: ings });
+    });
+
+    /* Comidas planificadas/cocinadas: qué receta, para cuántas personas y cuándo. */
+    (Array.isArray(raw.comidas) ? raw.comidas : []).slice(0, 800).forEach(function (r) {
+      if (!r || !fechaOk(r.fecha)) return;
+      var personas = entero(r.personas, 1, 5000, 0);
+      var recetaId = txt(r.recetaId, 20);
+      if (!recetaId || personas <= 0) return;
+      e.comidas.push({ id: txt(r.id, 20) || nuevoId(), fecha: r.fecha, recetaId: recetaId, personas: personas });
+    });
+
+    /* Migración v1: si viene de la versión vieja (sin inventario) y anotó stock, pasa a inventario real. */
+    if (!Array.isArray(raw.inventario) && Object.keys(e.stock).length) {
+      e.inventario = migrarStockV1(e.stock);
+    }
+
     return e;
   }
 
@@ -134,5 +229,5 @@
     return { leer: leer, guardar: guardar, actualizar: actualizar, exportarJSON: exportarJSON, importarJSON: importarJSON, borrar: borrar, get persistente() { return persistente; } };
   }
 
-  return { CLAVE: CLAVE, RUBROS: RUBROS, defaults: defaults, sanear: sanear, crear: crear, nuevoId: nuevoId, fechaOk: fechaOk };
+  return { CLAVE: CLAVE, RUBROS: RUBROS, UNIDADES: UNIDADES, defaults: defaults, sanear: sanear, crear: crear, nuevoId: nuevoId, fechaOk: fechaOk, aBase: aBase };
 });
