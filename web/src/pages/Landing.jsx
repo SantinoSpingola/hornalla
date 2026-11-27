@@ -207,7 +207,7 @@ export default function Landing() {
                   <p className="big">Me llamo Santino Spingola y hago Hornalla por mi cuenta, de forma independiente y gratuita.</p>
                   <p>Creo que la tecnología y la IA no tienen que quedar solo para las empresas grandes. Pueden estar al servicio de quien menos tiene: que un comedor tenga, gratis, lo que antes era tiempo perdido en tareas repetitivas, y pueda usar ese tiempo en la gente.</p>
                   <p>Eso es lo que más me llama de esto: <strong>que las cuentas no le quiten tiempo a la comida</strong>. Quiero ayudar de la forma más concreta que sé, que es hacer herramientas que funcionen, se puedan comprobar y respeten a las personas.</p>
-                  <p>No soy un organismo del Estado ni estoy afiliado al INDEC: uso los datos abiertos que el INDEC publica en su API oficial y los traduzco en algo que sirva el lunes a la mañana. No cobro, no vendo publicidad ni pido datos personales. Y no soy quien da de comer: eso lo hacen cada día las organizaciones. Yo les ahorro cuentas. Cuando toca pedir ayuda, la IA escribe el borrador; la revisa y la firma quien cocina.</p>
+                  <p>No soy un organismo del Estado ni estoy afiliado al INDEC: uso los datos abiertos que el INDEC publica en su API oficial y los traduzco en algo que sirva el lunes a la mañana. No cobro, no vendo publicidad ni pido datos personales. Y no soy quien da de comer: eso lo hacen cada día las organizaciones. Yo les ahorro cuentas. Cuando toca pedir ayuda, te preparo el pedido para que una IA te ayude a redactarlo; lo revisás y lo firmás vos.</p>
                 </Reveal>
                 <Reveal delay={1}>
                   <p className="eyebrow" style={{ marginBottom: "var(--s3)" }}>Cómo trabajo</p>
@@ -228,7 +228,7 @@ export default function Landing() {
             <Reveal className="panel-head">
               <p className="eyebrow">Las herramientas</p>
               <h2>Lo repetitivo, <mark><span>resuelto por la tecnología.</span></mark></h2>
-              <p>Simple, desde el celular y sin instalar nada. Y cuando toque pedir ayuda, la IA te escribe el borrador: nada sale sin tu revisión y nada viaja a ningún servidor.</p>
+              <p>Simple, desde el celular y sin instalar nada. Y cuando toque pedir ayuda, te preparamos el pedido con tus números para pegarlo en la IA que uses: nada sale sin tu revisión.</p>
             </Reveal>
             <div className="panel-in">
               <div className="grid-srv">
@@ -245,7 +245,7 @@ export default function Landing() {
                 <ol className="steps-h">
                   <li><h3>Cargá a tu grupo</h3><p>Cuántas personas comen, por edad. No hace falta anotar nombres.</p></li>
                   <li><h3>Mirá cuánto cuesta</h3><p>Con la canasta oficial del INDEC, para todo el mes y por ración.</p></li>
-                  <li><h3>Organizá y pedí mejor</h3><p>Presupuesto, despensa y el borrador de tu pedido: escrito con IA, revisado por vos.</p></li>
+                  <li><h3>Organizá y pedí mejor</h3><p>Presupuesto, despensa y el pedido con tus números, listo para pegar en una IA o en WhatsApp.</p></li>
                   <li><h3>Compartí tu página</h3><p>Enlace y QR para quienes quieran ayudar y, si querés, tu lugar en el mapa.</p></li>
                 </ol>
               </Reveal>
@@ -330,7 +330,7 @@ export default function Landing() {
               <Reveal className="panel-head"><p className="eyebrow">Preguntas frecuentes</p><h2 id="h-faq">Lo que más nos preguntan.</h2></Reveal>
               <Reveal className="faq">
                 <details><summary>¿Cuesta algo usar Hornalla?</summary><p>No. Es gratis, sin registro y sin publicidad.</p></details>
-                <details><summary>¿Hornalla usa IA?</summary><p>Sí, como ayudante para escribir: cuando armás tu página, puede redactar el pedido para vecinos, empresas o proveedores a partir de tus números reales. El texto se arma en tu dispositivo para copiar y pegar en la IA que uses: <strong>Hornalla no envía nada a ningún servidor</strong> y el borrador siempre lo revisa una persona antes de publicarse.</p></details>
+                <details><summary>¿Hornalla usa IA?</summary><p>Hornalla no tiene IA propia y no envía nada a ningún servidor. Lo que hace: cuando armás tu página, te prepara un pedido con tus números reales para que lo pegues en la IA que uses (ChatGPT, Gemini, Claude…) y te dé un borrador. Lo que la IA devuelva lo revisás y lo decidís vos.</p></details>
                 <details><summary>¿Qué pasa con los datos que cargo?</summary><p>Quedan solo en tu navegador, en tu dispositivo. No hay servidor ni base de datos con tus datos. Por eso conviene descargar una <strong>copia de seguridad</strong> desde la sección Compartir de la herramienta.</p></details>
                 <details><summary>¿Hornalla recibe donaciones?</summary><p>No. Hornalla <strong>no recibe, procesa ni verifica donaciones</strong>: las transferencias van directo de quien dona a la cuenta de la organización.</p></details>
                 <details><summary>¿Es un servicio oficial?</summary><p>No. Es un proyecto independiente de una persona: no es del INDEC ni de ningún organismo. Usa los datos abiertos que el INDEC publica en su API, y los resultados coinciden con los de los hogares tipo que ese organismo difunde.</p></details>
